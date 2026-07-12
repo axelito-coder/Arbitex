@@ -1,0 +1,31 @@
+.app-contenedor {
+  display: flex;
+  height: 100vh;
+}
+
+.app-sidebar {
+  height: 100%;
+  overflow: hidden;
+  transition: width 0.3s ease;
+}
+
+.app-sidebar.abierto {
+  width: 220px;
+}
+
+.app-sidebar.cerrado {
+  width: 0;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-contenido {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: #F5F5F5;
+}

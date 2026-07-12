@@ -1,0 +1,95 @@
+.cargar-contenedor {
+  display: flex;
+  justify-content: center;
+}
+
+.cargar-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 32px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.cargar-titulo {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-bottom: 24px;
+}
+
+.cargar-campo {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.cargar-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #595959;
+  margin-bottom: 6px;
+}
+
+.cargar-opcional {
+  font-weight: 400;
+  color: #E0E0E0;
+}
+
+.cargar-input {
+  padding: 10px 12px;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1A1A1A;
+  outline: none;
+}
+
+.cargar-input:focus {
+  border-color: #1A1A1A;
+}
+
+.cargar-boton {
+  width: 100%;
+  padding: 12px;
+  background: #EB0A1E;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.cargar-boton:hover {
+  background: #c90819;
+}
+
+.cargar-exito {
+  background: #D1FAE5;
+  color: #065F46;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.cargar-error {
+  color: #EB0A1E;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.input-error {
+  border-color: #EB0A1E;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .cargar-card {
+    padding: 20px;
+  }
+}
