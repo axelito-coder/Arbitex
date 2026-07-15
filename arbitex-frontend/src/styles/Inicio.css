@@ -4,79 +4,115 @@
   gap: 24px;
 }
 
-.seccion-titulo {
-  font-size: 12px;
-  font-weight: 500;
-  color: #595959;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-
-.card-turno {
-  background: #FFFFFF;
-  border-radius: 12px;
-  border: 2px solid #EB0A1E;
-  padding: 20px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
-
-.card-info {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.card-cliente {
-  font-size: 18px;
-  font-weight: 500;
+.inicio-saludo {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
   color: #1A1A1A;
 }
 
-.card-detalle {
+/* TURNO ACTUAL */
+.turno-actual {
+  background: #FFFFFF;
+  border-left: 4px solid #EB0A1E;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.turno-actual-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #EB0A1E;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+.turno-actual-datos {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.turno-actual-cliente {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1A1A;
+}
+
+.turno-actual-detalle {
+  font-size: 14px;
+  color: #595959;
+  margin-top: 2px;
+}
+
+.turno-actual-extra {
+  text-align: right;
+}
+
+.turno-actual-hora {
   font-size: 14px;
   color: #595959;
 }
 
-.card-monto {
-  font-size: 24px;
+.turno-actual-monto {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 20px;
   font-weight: 700;
   color: #1A1A1A;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.card-monto span {
-  font-size: 12px;
-  color: #595959;
-  font-weight: 400;
-  display: block;
 }
 
 .btn-iniciar {
-  margin-top: 8px;
+  margin-top: 16px;
   background: #10B981;
   color: #FFFFFF;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 10px 20px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  width: fit-content;
 }
 
-.btn-iniciar:hover {
-  background: #059669;
+.turno-espera {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  color: #595959;
+  font-size: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* SECCION TABLA */
+.inicio-seccion {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.seccion-titulo {
+  font-size: 13px;
+  font-weight: 500;
+  color: #595959;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+
+.sin-datos {
+  color: #595959;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px 0;
 }
 
 .tabla-contenedor {
-  background: #FFFFFF;
-  border-radius: 12px;
-  border: 0.5px solid #E0E0E0;
   overflow-x: auto;
 }
 
@@ -87,58 +123,43 @@
 }
 
 .tabla th {
-  padding: 12px 16px;
   text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid #E0E0E0;
   color: #595959;
   font-weight: 500;
-  border-bottom: 1px solid #E0E0E0;
-  background: #FAFAFA;
+  white-space: nowrap;
 }
 
 .tabla td {
-  padding: 12px 16px;
+  padding: 12px;
+  border-bottom: 1px solid #E0E0E0;
   color: #1A1A1A;
-  border-bottom: 0.5px solid #F0F0F0;
 }
 
 .tabla tr:last-child td {
   border-bottom: none;
 }
 
-.fila-opaca td {
-  opacity: 0.5;
+.fila-opaca {
+  opacity: 0.55;
 }
 
+/* BADGES */
 .badge {
-  display: inline-block;
   padding: 4px 10px;
-  border-radius: 20px;
+  border-radius: 99px;
   font-size: 12px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
-.badge-verde {
-  background: #D1FAE5;
-  color: #065F46;
-}
+.badge-verde   { background: #D1FAE5; color: #065F46; }
+.badge-azul    { background: #DBEAFE; color: #1E40AF; }
+.badge-naranja { background: #FEF3C7; color: #92400E; }
+.badge-gris    { background: #E0E0E0; color: #595959; }
 
-.badge-azul {
-  background: #DBEAFE;
-  color: #1E40AF;
-}
-
-.badge-naranja {
-  background: #FEF3C7;
-  color: #92400E;
-}
-
-@media (max-width: 600px) {
-  .card-turno {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .card-monto {
-    text-align: left;
-  }
+@media (max-width: 480px) {
+  .turno-actual-datos { flex-direction: column; }
+  .turno-actual-extra { text-align: left; }
 }

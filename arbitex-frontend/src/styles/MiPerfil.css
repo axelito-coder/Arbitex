@@ -1,0 +1,110 @@
+.mi-perfil {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* HEADER */
+.perfil-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.perfil-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #EB0A1E;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.perfil-nombre {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A1A1A;
+}
+
+.perfil-rol {
+  font-size: 13px;
+  color: #595959;
+  margin-top: 2px;
+}
+
+/* TARJETAS */
+.perfil-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.tarjeta {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.tarjeta-valor {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #EB0A1E;
+}
+
+.valor-alerta {
+  color: #F59E0B;
+}
+
+.tarjeta-label {
+  font-size: 12px;
+  color: #595959;
+  margin-top: 4px;
+}
+
+/* SECCION GRAFICOS */
+.perfil-seccion {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.grafico-botones {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.btn-grafico {
+  background: #F5F5F5;
+  color: #595959;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-grafico.activo {
+  background: #EB0A1E;
+  color: #FFFFFF;
+}
+
+@media (max-width: 768px) {
+  .perfil-tarjetas { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .perfil-tarjetas { grid-template-columns: 1fr; }
+}

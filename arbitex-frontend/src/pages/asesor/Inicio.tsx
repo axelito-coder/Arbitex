@@ -1,74 +1,97 @@
 import '../../styles/Inicio.css'
+import type { Turno } from '../../types'
 
-//REEMPLAZAR POR DATOS REALES DE BACKEND
+// BACKEND: vendría del login
+const asesorActual = 'Carlos R.'
 
-const turnoActual = {
-  cliente: 'Juan Pérez',
-  vehiculo: 'Toyota Corolla',
-  service: 'Service 10.000 km',
-  hora: '09:30',
-  monto: '$85.000',
+// BACKEND: turno que el sistema le asignó en este momento (o null si no hay ninguno esperando)
+const turnoActual: Turno | null = {
+  id: 5, hora: '11:00', cliente: 'Marcos Díaz', vehiculo: 'VW Gol 2019',
+  service: 'Cambio de aceite', monto: 25000, estado: 'Asignado'
 }
 
-//REEMPLAZAR POR DATOS REALES DE BACKEND
-const turnosDelDia = [
-  { hora: '08:00', cliente: 'María López', service: 'Cambio de aceite', monto: '$42.000', estado: 'Finalizado' },
-  { hora: '08:45', cliente: 'Carlos Ruiz', service: 'Revisión frenos', monto: '$67.000', estado: 'Finalizado' },
-  { hora: '09:30', cliente: 'Juan Pérez', service: 'Service 10.000 km', monto: '$85.000', estado: 'En proceso' },
+// BACKEND: turnos que ya le fueron asignados hoy (no incluye futuros: el sistema asigna en tiempo real)
+const misTurnosHoy: Turno[] = [
+  { id: 1, hora: '08:00', cliente: 'María López', vehiculo: 'Fiat Cronos',
+    service: 'Cambio de aceite', monto: 25000, estado: 'Finalizado' },
+  { id: 2, hora: '09:30', cliente: 'Juan Pérez', vehiculo: 'Toyota Corolla',
+    service: 'Service 10.000 km', monto: 48000, estado: 'En proceso' },
 ]
 
-function getBadgeClass(estado: string) {
+function getClaseEstado(estado: string) {
   if (estado === 'Finalizado') return 'badge badge-verde'
   if (estado === 'En proceso') return 'badge badge-azul'
-  return 'badge badge-naranja'
+  if (estado === 'Asignado') return 'badge badge-naranja'
+  return 'badge badge-gris'
+}
+
+function iniciarAtencion() {
+  // BACKEND: PATCH del turno actual -> estado 'En proceso'
+  console.log('Iniciar atención del turno', turnoActual?.id)
 }
 
 function Inicio() {
   return (
     <div className="inicio">
 
-      <div className="seccion">
-        <p className="seccion-titulo">Turno actual</p>
-        <div className="card-turno">
-          <div className="card-info">
-            <p className="card-cliente">{turnoActual.cliente}</p>
-            <p className="card-detalle">{turnoActual.vehiculo} · {turnoActual.service}</p>
-            <p className="card-detalle">🕐 {turnoActual.hora} hs</p>
-            <button className="btn-iniciar">Iniciar atención</button>
-          </div>
-          <div className="card-monto">
-            {turnoActual.monto}
-            <span>monto estimado</span>
-          </div>
-        </div>
-      </div>
+      <p className="inicio-saludo">Hola, {asesorActual} 👋</p>
 
-      <div className="seccion">
-        <p className="seccion-titulo">Mis turnos del día</p>
-        <div className="tabla-contenedor">
-          <table className="tabla">
-            <thead>
-              <tr>
-                <th>Hora</th>
-                <th>Cliente</th>
-                <th>Service</th>
-                <th>Monto</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {turnosDelDia.map((turno, i) => (
-                <tr key={i} className={turno.estado === 'Finalizado' ? 'fila-opaca' : ''}>
-                  <td>{turno.hora}</td>
-                  <td>{turno.cliente}</td>
-                  <td>{turno.service}</td>
-                  <td>{turno.monto}</td>
-                  <td><span className={getBadgeClass(turno.estado)}>{turno.estado}</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* TURNO ACTUAL — card destacada con borde rojo */}
+      {turnoActual ? (
+        <div className="turno-actual">
+          <p className="turno-actual-label">Turno actual</p>
+
+          <div className="turno-actual-datos">
+            <div>
+              <p className="turno-actual-cliente">{turnoActual.cliente}</p>
+              <p className="turno-actual-detalle">{turnoActual.vehiculo} · {turnoActual.service}</p>
+            </div>
+            <div className="turno-actual-extra">
+              <p className="turno-actual-hora">{turnoActual.hora}</p>
+              <p className="turno-actual-monto">${turnoActual.monto.toLocaleString('es-AR')}</p>
+            </div>
+          </div>
+
+          {/* El botón solo tiene sentido si todavía no arrancó la atención */}
+          {turnoActual.estado === 'Asignado' && (
+            <button className="btn-iniciar" onClick={iniciarAtencion}>
+              Iniciar atención
+            </button>
+          )}
         </div>
+      ) : (
+        <div className="turno-espera">Esperando asignación de turno...</div>
+      )}
+
+      {/* TURNOS YA ASIGNADOS HOY */}
+      <div className="inicio-seccion">
+        <p className="seccion-titulo">Turnos de hoy</p>
+
+        {misTurnosHoy.length === 0 ? (
+          <p className="sin-datos">No tenés turnos asignados hoy.</p>
+        ) : (
+          <div className="tabla-contenedor">
+            <table className="tabla">
+              <thead>
+                <tr>
+                  <th>Hora</th><th>Cliente</th><th>Service</th><th>Monto</th><th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {misTurnosHoy.map((t) => (
+                  // Los finalizados aparecen con menor opacidad (pide la guía)
+                  <tr key={t.id} className={t.estado === 'Finalizado' ? 'fila-opaca' : ''}>
+                    <td>{t.hora}</td>
+                    <td>{t.cliente}</td>
+                    <td>{t.service}</td>
+                    <td>${t.monto.toLocaleString('es-AR')}</td>
+                    <td><span className={getClaseEstado(t.estado)}>{t.estado}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
     </div>

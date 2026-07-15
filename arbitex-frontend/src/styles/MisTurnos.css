@@ -1,0 +1,96 @@
+.mis-turnos {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.mis-turnos-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.tarjeta {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.tarjeta-valor {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #EB0A1E;
+}
+
+.tarjeta-label {
+  font-size: 13px;
+  color: #595959;
+  margin-top: 4px;
+}
+
+.mis-turnos-seccion {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.seccion-titulo {
+  font-size: 13px;
+  font-weight: 500;
+  color: #595959;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+
+.tabla-contenedor {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tabla th {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid #E0E0E0;
+  color: #595959;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tabla td {
+  padding: 12px;
+  border-bottom: 1px solid #E0E0E0;
+  color: #1A1A1A;
+}
+
+.tabla tr:last-child td {
+  border-bottom: none;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-verde       { background: #D1FAE5; color: #065F46; }
+.badge-azul        { background: #DBEAFE; color: #1E40AF; }
+.badge-naranja     { background: #FEF3C7; color: #92400E; }
+.badge-gris        { background: #E0E0E0; color: #595959; }
+.badge-gris-oscuro { background: #E0E0E0; color: #1A1A1A; }
+.badge-rojo        { background: #FCE1E3; color: #EB0A1E; }
+
+@media (max-width: 768px) {
+  .mis-turnos-tarjetas { grid-template-columns: 1fr; }
+}
