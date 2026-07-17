@@ -1,0 +1,120 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* TARJETAS */
+.panel-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.asesor-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.asesor-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.asesor-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #EB0A1E;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.asesor-nombre {
+  font-weight: 500;
+  color: #1A1A1A;
+  font-size: 15px;
+}
+
+.badge-estado {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.badge-estado.ocupado {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.badge-estado.disponible {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.asesor-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.asesor-label {
+  font-size: 12px;
+  color: #595959;
+}
+
+.asesor-valor {
+  font-size: 14px;
+  color: #1A1A1A;
+}
+
+.asesor-valor.alerta {
+  color: #F59E0B;
+}
+
+.asesor-alerta {
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+/* GRÁFICO */
+.panel-grafico {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.seccion-titulo {
+  font-size: 13px;
+  font-weight: 500;
+  color: #595959;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .panel-tarjetas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .panel-tarjetas {
+    grid-template-columns: 1fr;
+  }
+}

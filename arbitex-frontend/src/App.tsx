@@ -6,6 +6,8 @@ import CargarTurno from './pages/encargado/CargarTurno'
 import Inicio from './pages/asesor/Inicio'
 import MisTurnos from './pages/asesor/MisTurnos'
 import MiPerfil from './pages/asesor/MiPerfil'
+import PanelAsesores from './pages/encargado/PanelAsesores'
+import Historial from './pages/encargado/Historial'
 import './App.css'
 
 function App() {
@@ -26,6 +28,8 @@ function App() {
           {/* Vistas de encargado */}
           {pagina === 'dashboard' && <Dashboard />}
           {pagina === 'cargar' && <CargarTurno />}
+          {pagina === 'asesores' && <PanelAsesores/>}
+          {pagina === 'historial' && <Historial/>}
 
           {/* Vistas de asesor */}
           {pagina === 'inicio' && <Inicio />}
