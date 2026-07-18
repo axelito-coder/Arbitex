@@ -1,41 +1,71 @@
+import { useEffect, useState } from 'react'
 import '../../styles/Dashboard.css'
 
-// REEMPLAZAR POR DATOS REALES DE BACKEND
-const resumen = [
-  { label: 'Total del día', valor: 12 },
-  { label: 'Asignados',     valor: 4  },
-  { label: 'En proceso',    valor: 2  },
-  { label: 'Finalizados',   valor: 5  },
-  { label: 'Pendientes',    valor: 1  },
-]
+type Turno = {
+  hora: string
+  cliente: string
+  tipo_service: string
+  asesor: string
+  estado: string
+}
 
-// REEMPLAZAR POR DATOS REALES DE BACKEND
-const alertas = [
-  { mensaje: 'Turno de Juan Pérez lleva 45 min sin atención', tipo: 'demora' },
-  { mensaje: 'Turno de Ana Gómez sin asignar hace 20 min',    tipo: 'sin-asignar' },
-]
-
-// REEMPLAZAR POR DATOS REALES DE BACKEND
-const turnos = [
-  { hora: '08:00', cliente: 'María López',  service: 'Cambio de aceite',  asesor: 'Carlos R.', estado: 'Finalizado'    },
-  { hora: '08:45', cliente: 'Carlos Ruiz',  service: 'Revisión frenos',   asesor: 'Laura M.',  estado: 'Finalizado'    },
-  { hora: '09:30', cliente: 'Juan Pérez',   service: 'Service 10.000 km', asesor: 'Carlos R.', estado: 'En proceso'    },
-  { hora: '10:00', cliente: 'Ana Gómez',    service: 'Cambio de aceite',  asesor: '-',         estado: 'Pendiente'     },
-  { hora: '10:30', cliente: 'Luis Herrera', service: 'Revisión general',  asesor: 'Laura M.',  estado: 'Asignado'      },
-]
+type Alerta = {
+  mensaje: string
+  tipo: string
+}
 
 function getClaseEstado(estado: string) {
-  if (estado === 'Finalizado')  return 'badge badge-verde'
-  if (estado === 'En proceso')  return 'badge badge-azul'
-  if (estado === 'Asignado')    return 'badge badge-naranja'
+  if (estado === 'finalizado')  return 'badge badge-verde'
+  if (estado === 'en_proceso')  return 'badge badge-azul'
+  if (estado === 'asignado')    return 'badge badge-naranja'
   return 'badge badge-gris'
 }
 
 function Dashboard() {
+  const [turnos, setTurnos]   = useState<Turno[]>([])
+  const [alertas, setAlertas] = useState<Alerta[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function cargarDatos() {
+      try {
+        const token = localStorage.getItem('token')
+        const res = await fetch('http://localhost:3000/encargado/turnos/hoy', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const data = await res.json()
+        setTurnos(data)
+
+        // Generar alertas de turnos pendientes
+        const pendientes = data.filter((t: Turno) => t.estado === 'Pendiente')
+        setAlertas(pendientes.map((t: Turno) => ({
+          mensaje: `Turno de ${t.cliente} sin asignar`,
+          tipo: 'sin-asignar'
+        })))
+
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    cargarDatos()
+  }, [])
+
+  const resumen = [
+    { label: 'Total del día', valor: turnos.length },
+    { label: 'Asignados',     valor: turnos.filter(t => t.estado === 'Asignado').length },
+    { label: 'En proceso',    valor: turnos.filter(t => t.estado === 'En proceso').length },
+    { label: 'Finalizados',   valor: turnos.filter(t => t.estado === 'Finalizado').length },
+    { label: 'Pendientes',    valor: turnos.filter(t => t.estado === 'Pendiente').length },
+  ]
+
+  if (loading) return <p className="seccion-titulo">Cargando...</p>
+
   return (
     <div className="dashboard">
 
-      {/* TARJETAS RESUMEN */}
       <div className="dashboard-tarjetas">
         {resumen.map((item) => (
           <div key={item.label} className="tarjeta">
@@ -45,17 +75,15 @@ function Dashboard() {
         ))}
       </div>
 
-      {/* ALERTAS */}
-      <div className="dashboard-seccion">
-        <p className="seccion-titulo">Alertas activas</p>
-        {alertas.map((alerta, i) => (
-          <div key={i} className="alerta">
-            ⚠ {alerta.mensaje}
-          </div>
-        ))}
-      </div>
+      {alertas.length > 0 && (
+        <div className="dashboard-seccion">
+          <p className="seccion-titulo">Alertas activas</p>
+          {alertas.map((alerta, i) => (
+            <div key={i} className="alerta">⚠ {alerta.mensaje}</div>
+          ))}
+        </div>
+      )}
 
-      {/* LISTA DE TURNOS */}
       <div className="dashboard-seccion">
         <p className="seccion-titulo">Turnos del día</p>
         <div className="tabla-contenedor">
@@ -70,15 +98,19 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {turnos.map((turno, i) => (
-                <tr key={i}>
-                  <td>{turno.hora}</td>
-                  <td>{turno.cliente}</td>
-                  <td>{turno.service}</td>
-                  <td>{turno.asesor}</td>
-                  <td><span className={getClaseEstado(turno.estado)}>{turno.estado}</span></td>
-                </tr>
-              ))}
+              {turnos.length === 0 ? (
+                <tr><td colSpan={5} className="sin-datos">No hay turnos hoy</td></tr>
+              ) : (
+                turnos.map((turno, i) => (
+                  <tr key={i}>
+                    <td>{turno.hora}</td>
+                    <td>{turno.cliente}</td>
+                    <td>{turno.tipo_service}</td>
+                    <td>{turno.asesor || '-'}</td>
+                    <td><span className={getClaseEstado(turno.estado)}>{turno.estado}</span></td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

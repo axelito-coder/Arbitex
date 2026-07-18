@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Inter:wght@400;500;600&display=swap');
+
+.login-fondo {
+  min-height: 100vh;
+  background: #00297c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.login-contenedor {
+  width: 100%;
+  max-width: 380px;
+  padding: 0 24px;
+}
+
+/* LOGO */
+.login-logo {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.login-svg-spin {
+  transform-origin: 100px 100px;
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.login-nombre {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 6px;
+  margin-top: 16px;
+}
+
+.login-subtitulo {
+  font-size: 11px;
+  color: #aaaacc;
+  letter-spacing: 4px;
+  margin-top: 4px;
+}
+
+/* FORMULARIO */
+.login-form {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 32px;
+}
+
+.login-campo {
+  margin-bottom: 20px;
+}
+
+.login-label {
+  display: block;
+  font-size: 12px;
+  color: #aaaacc;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.login-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.2s;
+}
+
+.login-input::placeholder {
+  color: rgba(170,170,204,0.5);
+}
+
+.login-input:focus {
+  border-color: rgba(235,10,30,0.5);
+}
+
+.login-error {
+  padding: 10px 14px;
+  background: rgba(255,107,107,0.15);
+  border: 1px solid rgba(255,107,107,0.3);
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #ff6b6b;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 13px;
+  background: #EB0A1E;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.login-btn:hover:not(:disabled) {
+  background: #c8091a;
+}
+
+.login-btn-loading {
+  background: rgba(235,10,30,0.5);
+  cursor: not-allowed;
+}
+
+/* FOOTER */
+.login-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 11px;
+  color: #aaaacc;
+}

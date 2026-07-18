@@ -4,10 +4,9 @@ type Props = {
   pagina: string
   setPagina: (p: string) => void
   rol: string
-  setRol: (r: string) => void
 }
 
-function Sidebar({ pagina, setPagina, rol, setRol }: Props) {
+function Sidebar({ pagina, setPagina, rol,}: Props) {
 
   const linksAsesor = [
     { id: 'inicio',   label: 'Inicio'    },
@@ -38,20 +37,6 @@ function Sidebar({ pagina, setPagina, rol, setRol }: Props) {
           {item.label}
         </div>
       ))}
-
-      {/* BACKEND: reemplazar este botón por el rol que viene del login */}
-      <div className="sidebar-rol">
-        <button
-          className="btn-rol"
-          onClick={() => {
-            setRol(rol === 'encargado' ? 'asesor' : 'encargado')
-            setPagina(rol === 'encargado' ? 'inicio' : 'dashboard')
-          }}
-        >
-          Ver como {rol === 'encargado' ? 'Asesor' : 'Encargado'}
-        </button>
-      </div>
-
     </div>
   )
 }
