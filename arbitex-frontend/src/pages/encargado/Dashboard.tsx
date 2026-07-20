@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import '../../styles/Dashboard.css'
 
 type Turno = {
-  hora: string
+  hora_carga: string
   cliente: string
   tipo_service: string
   asesor: string
@@ -55,10 +55,10 @@ function Dashboard() {
 
   const resumen = [
     { label: 'Total del día', valor: turnos.length },
-    { label: 'Asignados',     valor: turnos.filter(t => t.estado === 'Asignado').length },
-    { label: 'En proceso',    valor: turnos.filter(t => t.estado === 'En proceso').length },
-    { label: 'Finalizados',   valor: turnos.filter(t => t.estado === 'Finalizado').length },
-    { label: 'Pendientes',    valor: turnos.filter(t => t.estado === 'Pendiente').length },
+    { label: 'Asignados',     valor: turnos.filter(t => t.estado === 'asignado').length },
+    { label: 'En proceso',    valor: turnos.filter(t => t.estado === 'en proceso').length },
+    { label: 'Finalizados',   valor: turnos.filter(t => t.estado === 'finalizado').length },
+    { label: 'Pendientes',    valor: turnos.filter(t => t.estado === 'pendiente').length },
   ]
 
   if (loading) return <p className="seccion-titulo">Cargando...</p>
@@ -103,7 +103,7 @@ function Dashboard() {
               ) : (
                 turnos.map((turno, i) => (
                   <tr key={i}>
-                    <td>{turno.hora}</td>
+                    <td>{turno.hora_carga ? new Date(turno.hora_carga).toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'}) : '-'}</td>
                     <td>{turno.cliente}</td>
                     <td>{turno.tipo_service}</td>
                     <td>{turno.asesor || '-'}</td>

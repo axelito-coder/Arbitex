@@ -1,0 +1,153 @@
+.finalizar-contenedor {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.finalizar-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 28px;
+  width: 100%;
+  max-width: 560px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.finalizar-titulo {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin-bottom: 4px;
+}
+
+.finalizar-subtitulo {
+  font-size: 13px;
+  color: #595959;
+  margin-bottom: 20px;
+}
+
+.finalizar-error {
+  background: #FEE2E2;
+  border-left: 4px solid #EB0A1E;
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #EB0A1E;
+  margin-bottom: 16px;
+}
+
+.finalizar-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.finalizar-item {
+  background: #F5F5F5;
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-fila {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.item-tipo {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #FFFFFF;
+  color: #1A1A1A;
+}
+
+.item-eliminar {
+  padding: 6px 10px;
+  background: none;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #595959;
+  font-size: 12px;
+}
+
+.item-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.item-numero {
+  width: 50%;
+}
+
+.finalizar-agregar {
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: 1px dashed #E0E0E0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #595959;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.finalizar-agregar:hover {
+  border-color: #EB0A1E;
+  color: #EB0A1E;
+}
+
+.finalizar-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1A1A1A;
+  padding: 14px 0;
+  border-top: 1px solid #E0E0E0;
+  margin-bottom: 20px;
+}
+
+.finalizar-botones {
+  display: flex;
+  gap: 12px;
+}
+
+.finalizar-btn-cancelar {
+  flex: 1;
+  padding: 12px;
+  background: #F5F5F5;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #595959;
+}
+
+.finalizar-btn-confirmar {
+  flex: 2;
+  padding: 12px;
+  background: #EB0A1E;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.finalizar-btn-confirmar:disabled {
+  background: rgba(235,10,30,0.5);
+  cursor: not-allowed;
+}

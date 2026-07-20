@@ -8,6 +8,7 @@ type Props = {
 
 function Sidebar({ pagina, setPagina, rol,}: Props) {
 
+  const nombre = localStorage.getItem('nombre') || ''
   const linksAsesor = [
     { id: 'inicio',   label: 'Inicio'    },
     { id: 'turnos',   label: 'Mis Turnos'},
@@ -23,6 +24,13 @@ function Sidebar({ pagina, setPagina, rol,}: Props) {
 
   const links = rol === 'encargado' ? linksEncargado : linksAsesor
 
+   function cerrarSesion() {
+    localStorage.removeItem('token')
+    localStorage.removeItem('rol')
+    localStorage.removeItem('nombre')
+    window.location.reload()
+  }
+
   return (
     <div className="sidebar">
 
@@ -37,6 +45,14 @@ function Sidebar({ pagina, setPagina, rol,}: Props) {
           {item.label}
         </div>
       ))}
+
+       <div className="sidebar-footer">
+        <p className="sidebar-nombre">{nombre}</p>
+        <p className="sidebar-rol-label">{rol === 'encargado' ? 'Encargado' : 'Asesor'}</p>
+        <button className="btn-cerrar-sesion" onClick={cerrarSesion}>
+          Cerrar sesión
+        </button>
+      </div>
     </div>
   )
 }

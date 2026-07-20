@@ -6,10 +6,10 @@ import { RequestConUsuario } from '../middlewares/authMiddleware'
 export async function getTurnosHoy(req: RequestConUsuario, res: Response) {
   try {
     const result = await pool.query(`
-      SELECT t.id, t.horario, t.tipo_service, t.estado, t.es_compensacion,
-             c.nombre AS cliente,
-             v.marca || ' ' || v.modelo || ' ' || COALESCE(v.version, '') AS vehiculo,
-             u.nombre AS asesor
+      SELECT t.id, t.hora_carga, t.tipo_service, t.estado, t.es_compensacion,
+       c.nombre AS cliente,
+       v.marca || ' ' || v.modelo || ' ' || COALESCE(v.version, '') AS vehiculo,
+       u.nombre AS asesor
       FROM turnos t
       JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
       JOIN clientes c ON c.id = vc.id_cliente

@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { getTurnosHoy, getPanelAsesores, getHistorial, cargarTurno} from "../controllers/encargadoController";
+import { getTurnosHoy, getPanelAsesores, getHistorial } from "../controllers/encargadoController";
+import { cargarTurno } from "../controllers/turnosController";
 import { verificarToken, soloEncargado } from "../middlewares/authMiddleware";
 
 const encargadoRouter = Router()

@@ -19,8 +19,7 @@ function CargarTurno(){
     version: '',
     nro_serie: '',
     km: '',
-    tipoService: '',
-    horario: '',
+    tipoService: ''
   })
   const [errores, setErrores] = useState({
     nombre_cliente: '',
@@ -71,7 +70,6 @@ function CargarTurno(){
           nro_serie:      form.nro_serie || null,
           km:             form.km ? parseInt(form.km) : null,
           tipo_service:   form.tipoService,
-          horario:        form.horario || null,
         })
        })
 
@@ -82,7 +80,7 @@ function CargarTurno(){
         return
        }
       setEnviado(true)
-      setForm({ nombre_cliente: '', marca: '', modelo: '', version: '', nro_serie: '', km: '', tipoService: '', horario: '' })
+      setForm({ nombre_cliente: '', marca: '', modelo: '', version: '', nro_serie: '', km: '', tipoService: ''})
       setErrores({ nombre_cliente: '', tipoService: '' })
     }catch{
       setError('Error al conectar con el servidor')
@@ -149,11 +147,7 @@ function CargarTurno(){
         {errores.tipoService && <span className="cargar-error">{errores.tipoService}</span>}
       </div>
 
-      <div className="cargar-campo">
-        <label className="cargar-label">Horario <span className="cargar-opcional">(opcional)</span></label>
-        <input className="cargar-input" type="time" name="horario"
-          value={form.horario} onChange={handleChange}/>
-      </div>
+      
 
       <button className="cargar-boton" onClick={handleSubmit} disabled={loading}>
         {loading ? 'Cargando...' : 'Cargar turno'}

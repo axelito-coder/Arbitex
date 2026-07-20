@@ -1,6 +1,5 @@
 import { Router as ExpressRouter } from "express";
-import { getPerfil, getTurnosHoy, getTurnosSemana, iniciarAtencion } from "../controllers/asesorController";
-import router from "./authRoutes";
+import { getPerfil, getTurnosHoy, getTurnosSemana, iniciarAtencion, finalizarTurno } from "../controllers/asesorController";
 import { soloAsesor, verificarToken } from "../middlewares/authMiddleware";
 const asesorRouter = ExpressRouter()
 
@@ -9,9 +8,10 @@ asesorRouter.use(soloAsesor)
 
 asesorRouter.get('/perfil', getPerfil)
 asesorRouter.get('/turnos/hoy', getTurnosHoy)
-asesorRouter.get('/tuenos/semana', getTurnosSemana)
-asesorRouter.get('/turnos/:id/iniciar', iniciarAtencion)
+asesorRouter.get('/turnos/semana', getTurnosSemana)
+asesorRouter.put('/turnos/:id/iniciar', iniciarAtencion)
+asesorRouter.put('/turnos/:id/finalizar', finalizarTurno)
 
-export default router
+export default asesorRouter
 
 

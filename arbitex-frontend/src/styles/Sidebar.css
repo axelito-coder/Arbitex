@@ -46,3 +46,39 @@
   cursor: pointer;
   font-size: 13px;
 }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px;
+  border-top: 1px solid #2a2a2a;
+}
+
+.sidebar-nombre {
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-bottom: 2px;
+}
+
+.sidebar-rol-label {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.btn-cerrar-sesion {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid #EB0A1E;
+  border-radius: 6px;
+  color: #EB0A1E;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cerrar-sesion:hover {
+  background: #EB0A1E;
+  color: #FFFFFF;
+}
