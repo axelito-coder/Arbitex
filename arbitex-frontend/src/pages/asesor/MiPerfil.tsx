@@ -1,76 +1,105 @@
-import { useState } from 'react'
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Cell, LabelList
-} from 'recharts'
+import { useEffect, useState } from 'react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts'
 import '../../styles/MiPerfil.css'
 
-// BACKEND: datos del asesor logueado
-const datosAsesor = { nombre: 'Carlos R.', rol: 'Asesor de servicio' }
-
-// BACKEND: métricas reales de la semana
-const metricas = {
-  acumuladoSemanal: 187000,
-  comision: 14000,
-  turnosSemana: 11,
-  tiempoPromedio: 38,   // minutos, del asesor
-  promedioEquipo: 35,   // minutos, para comparar y pintar en naranja si lo supera
+type Perfil = {
+  nombre: string
+  acumulado_semanal: number
+  tiempo_promedio: number
+  orden_compensacion: number
+  comision: number
 }
 
-// BACKEND: monto acumulado por día de la semana actual
-const acumuladoPorDia = [
-  { dia: 'Lun', monto: 32000 },
-  { dia: 'Mar', monto: 28000 },
-  { dia: 'Mié', monto: 41000 },
-  { dia: 'Jue', monto: 25000 },
-  { dia: 'Vie', monto: 61000 },
-  { dia: 'Sáb', monto: 0 },
-  { dia: 'Dom', monto: 0 },
-]
-const diaActual = 'Vie' // BACKEND: día de hoy
-
-// BACKEND: duración de cada turno finalizado de la semana
-const tiemposPorTurno = [
-  { turno: 'María López', minutos: 32 },
-  { turno: 'Sofía Torres', minutos: 41 },
-  { turno: 'Juan Pérez', minutos: 29 },
-  { turno: 'Luis Herrera', minutos: 48 },
-]
+type Turno = {
+  id: number
+  cliente: string
+  duracion_minutos: number | null
+  estado: string
+  fecha: string
+}
 
 function MiPerfil() {
+  const [perfil, setPerfil] = useState<Perfil | null>(null)
+  const [turnos, setTurnos] = useState<Turno[]>([])
   const [grafico, setGrafico] = useState<'acumulado' | 'tiempos'>('acumulado')
-  const superaPromedio = metricas.tiempoPromedio > metricas.promedioEquipo
+  const [loading, setLoading] = useState(true)
 
+  useEffect(() => {
+    async function cargarDatos() {
+      try{
+        const token = localStorage.getItem('token')
+
+        const[resPerfil, resTurnos] = await Promise.all([
+          fetch('http://localhost:3000/asesor/perfil', {
+            headers: {Authorization: `Bearer ${token}`}
+          }),
+          fetch('http://localhost:3000/asesor/turnos/semana',{
+            headers: { Authorization: `Bearer ${token}`}
+          })
+        ])
+        const dataPerfil = await resPerfil.json()
+        const dataTurnos = await resTurnos.json()
+
+        if(resPerfil.ok){
+          setPerfil(dataPerfil)
+        }
+        if(resTurnos.ok){
+          setTurnos(dataTurnos)
+        }
+      }catch(err){
+        console.error(err)
+      }finally{
+        setLoading(false)
+      }
+    }
+    cargarDatos()
+  }, [])
+
+  if(loading){
+    return <p className='seccion-titulo'>Cargando...</p>
+  }
+  if(!perfil){
+    return <p className='seccion-titulo'>Error al cargar perfil</p>
+  }
+
+  const turnosFinalizados = turnos.filter(t => t.estado === 'finalizado')
+  const promedioEquipo = 20
+
+  const tiemposPorTurno = turnosFinalizados.map(t => ({
+    turno: t.cliente,
+    minutos: t.duracion_minutos ? Math.round(t.duracion_minutos) : 0
+  }))
+  
   return (
     <div className="mi-perfil">
 
       {/* HEADER */}
       <div className="perfil-header">
-        <div className="perfil-avatar">{datosAsesor.nombre.charAt(0)}</div>
+        <div className="perfil-avatar">{perfil.nombre.charAt(0)}</div>
         <div>
-          <p className="perfil-nombre">{datosAsesor.nombre}</p>
-          <p className="perfil-rol">{datosAsesor.rol}</p>
+          <p className="perfil-nombre">{perfil.nombre}</p>
+          <p className="perfil-rol">Asesor de servicio</p>
         </div>
       </div>
 
       {/* TARJETAS */}
       <div className="perfil-tarjetas">
         <div className="tarjeta">
-          <p className="tarjeta-valor">${metricas.acumuladoSemanal.toLocaleString('es-AR')}</p>
+          <p className="tarjeta-valor">${perfil.acumulado_semanal.toLocaleString('es-AR')}</p>
           <p className="tarjeta-label">Acumulado semanal</p>
         </div>
         <div className="tarjeta">
-          <p className="tarjeta-valor">${metricas.comision.toLocaleString('es-AR')}</p>
+          <p className="tarjeta-valor">${Number(perfil.comision).toLocaleString('es-AR')}</p>
           <p className="tarjeta-label">Comisión generada</p>
         </div>
         <div className="tarjeta">
-          <p className="tarjeta-valor">{metricas.turnosSemana}</p>
+          <p className="tarjeta-valor">{turnos.length}</p>
           <p className="tarjeta-label">Turnos de la semana</p>
         </div>
         <div className="tarjeta">
           {/* Se pinta naranja si el asesor supera el promedio del equipo */}
-          <p className={`tarjeta-valor ${superaPromedio ? 'valor-alerta' : ''}`}>
-            {metricas.tiempoPromedio} min
+          <p className={`tarjeta-valor ${perfil.tiempo_promedio > promedioEquipo ? 'valor-alerta' : ''}`}>
+            {perfil.tiempo_promedio} min
           </p>
           <p className="tarjeta-label">Tiempo promedio</p>
         </div>
@@ -93,51 +122,33 @@ function MiPerfil() {
           </button>
         </div>
 
-        {grafico === 'acumulado' ? (
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={acumuladoPorDia}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" vertical={false} />
-              <XAxis dataKey="dia" tick={{ fontSize: 13, fill: '#595959' }} axisLine={false} tickLine={false} />
-              <YAxis hide />
-              <Tooltip formatter={(value) => typeof value === 'number' ? `$${value.toLocaleString('es-AR')}` : ''} />
-              <Bar dataKey="monto" radius={[4, 4, 0, 0]}>
-                <LabelList
-                  dataKey="monto"
-                  position="top"
-                  formatter={(v) =>
-                    typeof v === 'number' && v > 0 ? `$${(v / 1000).toFixed(0)}k` : ''
-                  }
-                  style={{ fontSize: 12, fill: '#595959' }}
-                />
-                {/* El día actual va rojo completo, el resto con opacidad */}
-                {acumuladoPorDia.map((d, i) => (
-                  <Cell key={i} fill={d.dia === diaActual ? '#EB0A1E' : '#EB0A1E80'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
+        {grafico === 'acumulado' && (
+          <div>
+            <p style={{fontSize: 13, color: '#595959', marginBottom: 16}}>Acumulado semanal total</p>
+            <div style={{textAlign: 'center', padding: 32}}>
+              <p style={{fontFamily: 'Rajdhani, sans-serif', fontSize: 48, fontWeight: 700, color: '#EB0A1E'}}>
+                ${perfil.acumulado_semanal.toLocaleString('es-AR')}
+              </p>
+              <p style={{fontSize: 13, color: '#595959'}}>En {turnos.length} turnos esta semana</p>
+            </div>
+          </div>
+        )}
+
+        {grafico === 'tiempos' && (
           <ResponsiveContainer width="100%" height={Math.max(200, tiemposPorTurno.length * 50)}>
-            <BarChart data={tiemposPorTurno} layout="vertical" margin={{ left: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" horizontal={false} />
-              <XAxis type="number" hide />
-              <YAxis
-                dataKey="turno" type="category"
-                tick={{ fontSize: 13, fill: '#595959' }}
-                axisLine={false} tickLine={false} width={110}
-              />
-              <Tooltip formatter={(value) => typeof value === 'number' ? `${value} min` : ''} />
+            <BarChart data={tiemposPorTurno} layout='vertical' margin={{ left: 20}}>
+              <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' horizontal={false}/>
+              <XAxis type='number' hide/>
+              <YAxis dataKey="turno" type='category' tick={{ fontSize: 13, fill: '#595959'}} axisLine={false} tickLine={false} width={110}/>
+              <Tooltip formatter={(value) => typeof value === 'number' ? `${value} min` : ''}/>
               <Bar dataKey="minutos" radius={[0, 4, 4, 0]}>
-                <LabelList
-                  dataKey="minutos" position="right"
-                  formatter={(value) => value != null ? `${value} min` : ''}
-                  style={{ fontSize: 12, fill: '#595959' }}
-                />
-                {/* Verde si está dentro del promedio del equipo, naranja si lo supera */}
-                {tiemposPorTurno.map((t, i) => (
-                  <Cell key={i} fill={t.minutos > metricas.promedioEquipo ? '#F59E0B' : '#10B981'} />
-                ))}
-              </Bar>
+                <LabelList dataKey="minutos" position="right" formatter={(v) => v != null ? `${v} min` : ''} style={{fontSize: 12, fill: '#595959'}}/>
+                  {
+                    tiemposPorTurno.map((t, i) => (
+                      <Cell key={i} fill={t.minutos > promedioEquipo ? '#F59E0B' : '#10B981'}/>
+                    ))
+                  }
+              </Bar>              
             </BarChart>
           </ResponsiveContainer>
         )}

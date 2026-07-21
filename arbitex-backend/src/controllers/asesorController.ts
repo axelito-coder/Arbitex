@@ -5,7 +5,7 @@ import {RequestConUsuario} from '../middlewares/authMiddleware'
 export async function  getPerfil(req: RequestConUsuario, res: Response) {
     try{
         const result = await pool.query(`
-            SELECT u.nomre, e.acumulado_semanal, e.tiempo_promedio, e.orden_compensacion,
+            SELECT u.nombre, e.acumulado_semanal, e.tiempo_promedio, e.orden_compensacion,
                    (e.acumulado_semanal * 0.01) AS comision
                 FROM empleados e
                 JOIN usuarios u ON u.id = e.id_usuario

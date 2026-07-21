@@ -9,17 +9,30 @@ function getNumeroSemana(fecha: Date): number {
     return Math.ceil((dias + inicio.getDay() + 1) / 7)
 }
 
-async function  verificarNuevaSemana(): Promise<boolean> {
+async function verificarNuevaSemana(): Promise<boolean> {
+  try {
     const fecha = new Date()
     const semanaActual = getNumeroSemana(fecha)
     const añoActual = fecha.getFullYear()
 
+    console.log('semanaActual:', semanaActual)
+    console.log('añoActual:', añoActual)
+
     const result = await pool.query(
-        'SELECT semana_activa, año_activo FROM config WHERE id = 1'
+      'SELECT semana_activa, año_activo FROM config WHERE id = 1'
     )
 
+    console.log('config result:', result.rows)
+
     const config = result.rows[0]
+    console.log('config:', config)
+    console.log('esNuevaSemana:', config.semana_activa !== semanaActual || config.año_activo !== añoActual)
+
     return config.semana_activa !== semanaActual || config.año_activo !== añoActual
+  } catch (err) {
+    console.error('Error en verificarNuevaSemana:', err)
+    return false
+  }
 }
 
 async function  guardarSemanaActiva(): Promise<void> {
@@ -153,6 +166,7 @@ async function asignarTurno(idTurno: number): Promise<void> {
 }
 
 export async function cargarTurno(req: RequestConUsuario, res: Response) {
+    console.log('cargarTurno llamado', req.body)  // ← acá
     const { nombre_cliente, marca, modelo, version, nro_serie, km, tipo_service} = req.body
 
     if(!nombre_cliente || !tipo_service){
@@ -202,7 +216,11 @@ export async function cargarTurno(req: RequestConUsuario, res: Response) {
     const turnosHoy = await contarTurnosHoy()
     const cantidadAsesores = await contarAsesores()
 
+    console.log('esNuevaSemana:', esNuevaSemana)
+    console.log('turnosHoy:', turnosHoy) 
+
     if (esNuevaSemana && turnosHoy === 0) {
+        console.log('Ejecutando respaldo...')
       await aplicarCompensacionSemanal()
       await guardarSemanaActiva()
     }
