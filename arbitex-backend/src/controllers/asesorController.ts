@@ -2,6 +2,44 @@ import { Response } from 'express'
 import pool from '../db'
 import {RequestConUsuario} from '../middlewares/authMiddleware'
 
+
+export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
+    const { id } = req.params
+
+    try{
+        const turnoResult = await pool.query(`
+            SELECT t.id, t.fecha, t.hora_carga, t.hora_inicio_atencion, t.hora_cierre_atencion,
+              t.duracion_minutos, t.tipo_service, t.estado, t.es_compensacion,
+              c.nombre AS cliente, c.cuit, c.telefono, c.condicion_iva,
+              v.marca, v.modelo, v.version,
+              vc.nro_serie, vc.km,
+              u.nombre AS asesor,
+              f.nro_factura, f.total,
+              co.monto AS comision
+            FROM turnos t
+            JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
+            JOIN clientes c ON c.id = vc.id_cliente
+            JOIN vehiculos v ON v.id = vc.id_vehiculo
+            LEFT JOIN empleados e ON e.id = t.id_asesor
+            LEFT JOIN usuarios u ON u.id = e.id_usuario
+            LEFT JOIN facturas f ON f.id_turno = t.id
+            LEFT JOIN comisiones co ON co.id_factura = f.id
+            WHERE t.id = $1
+        `, [id])
+        if(turnoResult.rows.length === 0){
+            return res.status(404).json({ mensaje: 'Turno no encontrado'})
+        }
+        const itemsResult = await pool.query(`
+            SELECT descripcion, cantidad, precio_unitario, tipo
+            FROM items_turno
+            WHERE id_turno = $1
+        `, [id])
+        return res.json({...turnoResult.rows[0], items: itemsResult.rows})
+    }catch (err){
+        console.error(err)
+        return res.status(500).json({ mensaje: 'Error interno del servidor'})
+    }
+}
 export async function  getPerfil(req: RequestConUsuario, res: Response) {
     try{
         const result = await pool.query(`
@@ -15,7 +53,22 @@ export async function  getPerfil(req: RequestConUsuario, res: Response) {
             return res.status(404).json({ mensaje: 'Asesor no encontrado'})
         }
 
-        return res.json(result.rows[0])
+
+        //acumulado por día de la semana
+        const acumuladoPorDia = await pool.query(`
+            SELECT t.fecha, COALESCE(SUM(f.total), 0) AS total
+            FROM turnos t
+            LEFT JOIN facturas f ON f.id_turno = t.id
+            JOIN empleados e ON e.id = t.id_asesor
+            WHERE e.id_usuario = $1
+            AND t.fecha >= DATE_TRUNC('week', CURRENT_DATE)
+            AND t.fecha < DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '7 days'
+            AND t.estado = 'finalizado'
+            GROUP BY t.fecha
+            ORDER BY t.fecha ASC
+        `, [req.usuario?.id]) 
+
+        return res.json({...result.rows[0], acumulado_por_dia: acumuladoPorDia.rows})
     }catch(err){
         console.error(err)
         return res.status(500).json({ mensaje: 'Error interno del servidor'})
@@ -163,6 +216,19 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
          SET acumulado_semanal = acumulado_semanal + $1
          WHERE id_usuario = $2
         `, [total, req.usuario?.id])
+
+        //Actualizar el tiempo promedio del asesor
+        await pool.query(`
+            UPDATE empleados
+            SET tiempo_promedio = (
+              SELECT AVG(duracion_minutos)
+              FROM turnos
+              WHERE id_asesor = (SELECT id FROM empleados WHERE id_usuario = $1)
+              AND estado = 'finalizado'
+              AND duracion_minutos IS NOT NULL
+            )
+            WHERE id_usuario = $1
+        `, [req.usuario?.id])
 
         return res.json({ mensaje: 'Turno finalizado correctamente', total, comision: monto})
     }catch (err){

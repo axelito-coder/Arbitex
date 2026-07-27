@@ -7,6 +7,7 @@ type Turno = {
   tipo_service: string
   asesor: string
   estado: string
+  duracion: number | null
 }
 
 type Alerta = {
@@ -25,7 +26,6 @@ function Dashboard() {
   const [turnos, setTurnos]   = useState<Turno[]>([])
   const [alertas, setAlertas] = useState<Alerta[]>([])
   const [loading, setLoading] = useState(true)
-
   useEffect(() => {
     async function cargarDatos() {
       try {
@@ -36,12 +36,19 @@ function Dashboard() {
         const data = await res.json()
         setTurnos(data)
 
-        // Generar alertas de turnos pendientes
-        const pendientes = data.filter((t: Turno) => t.estado === 'Pendiente')
-        setAlertas(pendientes.map((t: Turno) => ({
-          mensaje: `Turno de ${t.cliente} sin asignar`,
-          tipo: 'sin-asignar'
-        })))
+         const pendientes = data.filter((t: Turno) => t.estado === 'pendiente')
+         const demorados = data.filter((t: Turno) => t.duracion !== null && t.duracion > 3 && t.estado === 'en_proceso')
+
+        setAlertas([
+         ...pendientes.map((t:Turno) =>({
+         mensaje: `Turno de ${t.cliente} sin asignar`,
+         tipo: 'Sin asignar'
+        })),
+         ...demorados.map((t: Turno) => ({
+         mensaje: `${t.asesor} lleva ${Math.round(t.duracion!)} min atendiendo a ${t.cliente}`,
+         tipo: 'demora'
+        }))
+  ])
 
       } catch (err) {
         console.error(err)
@@ -56,7 +63,7 @@ function Dashboard() {
   const resumen = [
     { label: 'Total del día', valor: turnos.length },
     { label: 'Asignados',     valor: turnos.filter(t => t.estado === 'asignado').length },
-    { label: 'En proceso',    valor: turnos.filter(t => t.estado === 'en proceso').length },
+    { label: 'En proceso',    valor: turnos.filter(t => t.estado === 'en_proceso').length },
     { label: 'Finalizados',   valor: turnos.filter(t => t.estado === 'finalizado').length },
     { label: 'Pendientes',    valor: turnos.filter(t => t.estado === 'pendiente').length },
   ]
@@ -108,6 +115,7 @@ function Dashboard() {
                     <td>{turno.tipo_service}</td>
                     <td>{turno.asesor || '-'}</td>
                     <td><span className={getClaseEstado(turno.estado)}>{turno.estado}</span></td>
+                    <td>{turno.duracion ? `${Math.round(Number(turno.duracion))}min` : '-'}</td>
                   </tr>
                 ))
               )}

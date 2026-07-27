@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts'
 import '../../styles/MiPerfil.css'
 
+
+//En typescript cuando hacemos type ... definimos como debe ser un objeto
+//Cuando typescript compila el codigo a javascript, los types no existen mas, solo sirven para detectar errores y hacer las coas mas limpias
 type Perfil = {
   nombre: string
   acumulado_semanal: number
   tiempo_promedio: number
   orden_compensacion: number
   comision: number
+  acumulado_por_dia: {fecha: string, total: number}[]
 }
 
 type Turno = {
@@ -124,13 +128,35 @@ function MiPerfil() {
 
         {grafico === 'acumulado' && (
           <div>
-            <p style={{fontSize: 13, color: '#595959', marginBottom: 16}}>Acumulado semanal total</p>
-            <div style={{textAlign: 'center', padding: 32}}>
-              <p style={{fontFamily: 'Rajdhani, sans-serif', fontSize: 48, fontWeight: 700, color: '#EB0A1E'}}>
-                ${perfil.acumulado_semanal.toLocaleString('es-AR')}
+            <p style={{ fontSize: 13, color: '#595959', marginBottom: 16}}>Acumulado por día</p>
+            {perfil.acumulado_por_dia.length === 0 ? (
+              <p style={{fontSize: 13, color: '#595959', textAlign: 'center', padding: 32}}> 
+              No hay turnos finalizados esta semana
               </p>
-              <p style={{fontSize: 13, color: '#595959'}}>En {turnos.length} turnos esta semana</p>
-            </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={perfil.acumulado_por_dia}>
+                  <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false}/>
+                  <XAxis dataKey="fecha" tick={{fontSize: 12, fill: '#595959'}} axisLine={false} tickLine={false}
+                  tickFormatter={(v) => {
+                    const fecha = new Date(v)
+                    return fecha.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', timeZone: 'America/Argentina/Buenos_Aires'})
+                  }}/>
+                  <YAxis hide/>
+                  <Tooltip labelFormatter={(v) => {
+                    const fecha = new Date(v)
+                    return fecha.toLocaleDateString('es-AR', {weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Argentina/Buenos_Aires'})
+                  }}
+                   formatter={(value) => typeof value === 'number' ? [`$${value.toLocaleString('es-AR')}`, 'Acumulado'] : [value, '']}/>
+                  <Bar dataKey="total" radius={[4, 4, 0, 0]}>
+                    <LabelList dataKey="total" position="top" formatter={(v: unknown) => typeof v === 'number' ? `$${v.toLocaleString('es-AR')}` : ''} style={{ fontSize: 11, fill: '#595959'}}/>
+                    {perfil.acumulado_por_dia.map((_, i) => (
+                      <Cell key={i} fill='#EB0A1E'/>
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         )}
 

@@ -1,41 +1,69 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import DetalleTurno from '../../components/DetalleTurno'
 import '../../styles/Historial.css'
 
-// BACKEND: turnos de la semana
-const turnosHistorial = [
-  { id: 1, hora: '08:00', cliente: 'María López',  vehiculo: 'Fiat Cronos',      service: 'Cambio de aceite',  asesor: 'Carlos R.', estado: 'Finalizado',     duracion: '32 min', fecha: '2026-07-14' },
-  { id: 2, hora: '08:45', cliente: 'Carlos Ruiz',  vehiculo: 'Toyota Corolla',   service: 'Revisión frenos',   asesor: 'Laura M.',  estado: 'Finalizado',     duracion: '28 min', fecha: '2026-07-14' },
-  { id: 3, hora: '09:30', cliente: 'Juan Pérez',   vehiculo: 'Honda Civic',      service: 'Service 10.000 km', asesor: 'Carlos R.', estado: 'En proceso',     duracion: '-',      fecha: '2026-07-15' },
-  { id: 4, hora: '10:00', cliente: 'Ana Gómez',    vehiculo: 'Renault Sandero',  service: 'Cambio de aceite',  asesor: '-',         estado: 'Pendiente',      duracion: '-',      fecha: '2026-07-15' },
-  { id: 5, hora: '10:30', cliente: 'Luis Herrera', vehiculo: 'VW Gol',           service: 'Revisión general',  asesor: 'Sofía T.',  estado: 'Asignado',       duracion: '-',      fecha: '2026-07-16' },
-  { id: 6, hora: '11:00', cliente: 'Diego Ramos',  vehiculo: 'Ford Ka',          service: 'Alineación',        asesor: 'Laura M.',  estado: 'No presentado',  duracion: '-',      fecha: '2026-07-16' },
-  { id: 7, hora: '14:00', cliente: 'Sofía Torres', vehiculo: 'Peugeot 208',      service: 'Cambio de aceite',  asesor: 'Carlos R.', estado: 'Anulado',        duracion: '-',      fecha: '2026-07-17' },
-]
-
-const asesores = ['Todos', 'Carlos R.', 'Laura M.', 'Sofía T.']
-const estados  = ['Todos', 'Finalizado', 'En proceso', 'Asignado', 'Pendiente', 'No presentado', 'Anulado']
-
+type Turno = {
+  id: number
+  fecha: string
+  hora_carga: string
+  cliente: string
+  vehiculo: string
+  tipo_service: string
+  asesor: string
+  estado: string
+  duracion: number | null
+  es_compensacion: boolean
+}
 function getClaseEstado(estado: string) {
-  if (estado === 'Finalizado')    return 'badge badge-verde'
-  if (estado === 'En proceso')    return 'badge badge-azul'
-  if (estado === 'Asignado')      return 'badge badge-naranja'
-  if (estado === 'Anulado')       return 'badge badge-rojo'
-  if (estado === 'No presentado') return 'badge badge-gris-oscuro'
+  if (estado === 'finalizado')    return 'badge badge-verde'
+  if (estado === 'en_proceso')    return 'badge badge-azul'
+  if (estado === 'asignado')      return 'badge badge-naranja'
+  if (estado === 'pendiente') return 'badge badge-gris-oscuro'
   return 'badge badge-gris'
 }
 
 function Historial() {
-  const [filtroAsesor, setFiltroAsesor] = useState('Todos')
-  const [filtroEstado, setFiltroEstado] = useState('Todos')
-  const [filtroFecha, setFiltroFecha]   = useState('')
+  const [turnoDetalle, setTurnoDetalle] = useState<number | null >(null) 
+  const [turnos, setTurnos] = useState<Turno[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filtroAsesor, setFiltroAsesor] = useState('')
+  const [filtroEstado, setFiltroEstado] = useState('')
 
-  const turnosFiltrados = turnosHistorial.filter((t) => {
+  useEffect(() => {
+    async function  cargarHistorial() {
+      try{
+        const token = localStorage.getItem('token')
+        const res = await fetch('http://localhost:3000/encargado/historial', {
+          headers: { Authorization: `Bearer ${token}`}
+        })
+        const data = await res.json()
+        if(res.ok){
+          setTurnos(data)
+        }
+      }catch(err){
+        console.error(err)
+      }finally{
+        setLoading(false)
+      }
+    }
+    cargarHistorial()
+  }, [])
+  if(loading){
+    return <p className='seccion-titulo'>Cargando...</p>
+  }
+const asesores = [...new Set(turnos.map(t => t.asesor).filter(Boolean))]
+  const turnosFiltrados = turnos.filter((t) => {
     if (filtroAsesor !== 'Todos' && t.asesor !== filtroAsesor) return false
     if (filtroEstado !== 'Todos' && t.estado !== filtroEstado) return false
-    if (filtroFecha && t.fecha !== filtroFecha) return false
+    
     return true
   })
 
+  if(turnoDetalle){
+    return(
+      <DetalleTurno idTurno={turnoDetalle} onVolver={() => setTurnoDetalle(null)} urlBase='http://localhost:3000/encargado'/>
+    )
+  }
   return (
     <div className="historial">
 
@@ -45,6 +73,7 @@ function Historial() {
         <div className="filtro-campo">
           <label className="filtro-label">Asesor</label>
           <select className="filtro-select" value={filtroAsesor} onChange={(e) => setFiltroAsesor(e.target.value)}>
+            <option value="">Todos los asesores</option>
             {asesores.map((a) => <option key={a}>{a}</option>)}
           </select>
         </div>
@@ -52,21 +81,15 @@ function Historial() {
         <div className="filtro-campo">
           <label className="filtro-label">Estado</label>
           <select className="filtro-select" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
-            {estados.map((e) => <option key={e}>{e}</option>)}
+            <option value="">Todos los estados</option>
+            <option value="en_proceso">En proceso</option>
+            <option value="finalizado">Finalizado</option>
+            <option value="pendiente">Pendiente</option>
           </select>
         </div>
 
-        <div className="filtro-campo">
-          <label className="filtro-label">Fecha</label>
-          <input
-            className="filtro-select"
-            type="date"
-            value={filtroFecha}
-            onChange={(e) => setFiltroFecha(e.target.value)}
-          />
-        </div>
 
-        <button className="filtro-limpiar" onClick={() => { setFiltroAsesor('Todos'); setFiltroEstado('Todos'); setFiltroFecha('') }}>
+        <button className="filtro-limpiar" onClick={() => { setFiltroAsesor('Todos'); setFiltroEstado('Todos'); }}>
           Limpiar filtros
         </button>
 
@@ -95,15 +118,15 @@ function Historial() {
                 </tr>
               ) : (
                 turnosFiltrados.map((t) => (
-                  <tr key={t.id}>
+                  <tr key={t.id} onClick={() => setTurnoDetalle(t.id)} style={{cursor: 'pointer'}}>
                     <td>{t.fecha}</td>
-                    <td>{t.hora}</td>
+                    <td>{t.hora_carga}</td>
                     <td>{t.cliente}</td>
                     <td>{t.vehiculo}</td>
-                    <td>{t.service}</td>
+                    <td>{t.tipo_service}</td>
                     <td>{t.asesor}</td>
                     <td><span className={getClaseEstado(t.estado)}>{t.estado}</span></td>
-                    <td>{t.duracion}</td>
+                    <td>{t.estado === 'finalizado' && t.duracion ? `${Math.round(Number(t.duracion))} min` : '-'}</td>
                   </tr>
                 ))
               )}

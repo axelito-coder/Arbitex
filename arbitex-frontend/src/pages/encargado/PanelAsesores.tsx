@@ -1,61 +1,71 @@
+import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import '../../styles/PanelAsesores.css'
 
-// BACKEND: lista de asesores con su estado actual
-const asesores = [
-  {
-    id: 1,
-    nombre: 'Carlos R.',
-    estado: 'ocupado',
-    turnoActual: { cliente: 'Juan Pérez', service: 'Service 10.000 km' },
-    acumuladoSemanal: 187000,
-    tiempoPromedio: 38,
-  },
-  {
-    id: 2,
-    nombre: 'Laura M.',
-    estado: 'disponible',
-    turnoActual: null,
-    acumuladoSemanal: 142000,
-    tiempoPromedio: 29,
-  },
-  {
-    id: 3,
-    nombre: 'Sofía T.',
-    estado: 'ocupado',
-    turnoActual: { cliente: 'Ana Gómez', service: 'Revisión general' },
-    acumuladoSemanal: 165000,
-    tiempoPromedio: 41,
-  },
-]
-
-// BACKEND: promedio del equipo para marcar alertas
-const promedioEquipo = 35
-
-// Datos para el gráfico — se arman a partir de los asesores
-const datosGrafico = asesores.map((a) => ({
-  nombre: a.nombre,
-  acumulado: a.acumuladoSemanal,
-}))
+type Asesor = {
+  nombre: string
+  acumulado_semanal: number
+  sesion_activa: boolean
+  tiempo_promedio: number
+  orden_compensacion: number
+  comision: number
+  turnos_hoy: number
+  en_proceso: number
+}
 
 function PanelAsesores() {
+  
+  const [ asesores, setAsesores] = useState<Asesor[]>([])
+  const [ loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function  cargarAsesores() {
+      try{
+        const token = localStorage.getItem('token')
+        const res = await fetch('http://localhost:3000/encargado/asesores', {
+          headers: { Authorization: `Bearer ${token}`}
+        })
+        const data = await res.json()
+        if(res.ok){
+          setAsesores(data)
+        }
+      }catch(err){
+        console.error(err)
+      }finally{
+        setLoading(false)
+      }
+    }
+    setLoading(false)
+    cargarAsesores()
+  }, [])
+  
+  if(loading){
+    return <p className='seccion-titulo'>Cargando...</p>
+  }
+  const promedioEquipo = 20
+  const datosGrafico = asesores.map(a => ({
+    nombre: a.nombre,
+    acumulado: a.acumulado_semanal
+  }))
+  
   return (
     <div className="panel">
 
       {/* TARJETAS DE ASESORES */}
       <div className="panel-tarjetas">
-        {asesores.map((asesor) => {
-          const superaPromedio = asesor.tiempoPromedio > promedioEquipo
+        {asesores.map((asesor, i) => {
+          const superaPromedio = asesor.tiempo_promedio > promedioEquipo
+          const ocupado = asesor.en_proceso > 0
 
           return (
-            <div key={asesor.id} className="asesor-card">
+            <div key={i} className="asesor-card">
 
               <div className="asesor-header">
                 <div className="asesor-avatar">{asesor.nombre.charAt(0)}</div>
                 <div>
                   <p className="asesor-nombre">{asesor.nombre}</p>
-                  <span className={`badge-estado ${asesor.estado}`}>
-                    {asesor.estado === 'ocupado' ? 'Ocupado' : 'Disponible'}
+                  <span className={`badge-estado ${ocupado ? 'ocupado' : 'disponible'}`}>
+                    {ocupado ? 'Ocupado' : 'Disponible'}
                   </span>
                 </div>
               </div>
@@ -63,21 +73,24 @@ function PanelAsesores() {
               <div className="asesor-info">
                 <p className="asesor-label">Turno actual</p>
                 <p className="asesor-valor">
-                  {asesor.turnoActual
-                    ? `${asesor.turnoActual.cliente} — ${asesor.turnoActual.service}`
-                    : 'Sin turno asignado'}
+                  {asesor.turnos_hoy}
                 </p>
               </div>
 
               <div className="asesor-info">
                 <p className="asesor-label">Acumulado semanal</p>
-                <p className="asesor-valor">${asesor.acumuladoSemanal.toLocaleString('es-AR')}</p>
+                <p className="asesor-valor">${Number(asesor.acumulado_semanal).toLocaleString('es-AR')}</p>
+              </div>
+
+              <div className="asesor-info">
+                <p className='asesor-label'>Comisión</p>
+                <p className='asesor-valor'>${Number(asesor.comision).toLocaleString('es-AR')}</p>
               </div>
 
               <div className="asesor-info">
                 <p className="asesor-label">Tiempo promedio</p>
                 <p className={`asesor-valor ${superaPromedio ? 'alerta' : ''}`}>
-                  {asesor.tiempoPromedio} min
+                  {Math.round(Number(asesor.tiempo_promedio))} min
                   {superaPromedio && <span className="asesor-alerta"> ⚠ Supera el promedio</span>}
                 </p>
               </div>
@@ -88,17 +101,17 @@ function PanelAsesores() {
       </div>
 
       {/* GRÁFICO COMPARATIVO */}
-      <div className="panel-grafico">
-        <p className="seccion-titulo">Acumulado semanal por asesor</p>
+      <div className='panel-grafico'>
+        <p className='seccion-titulo'>Acumulado semanal por asesor</p>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={datosGrafico}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" vertical={false} />
-            <XAxis dataKey="nombre" tick={{ fontSize: 13, fill: '#595959' }} axisLine={false} tickLine={false} />
-            <YAxis hide />
-            <Tooltip formatter={(value) => typeof value === 'number' ? `$${value.toLocaleString('es-AR')}` : ''} />
+            <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false}/>
+            <XAxis dataKey="nombre" tick={{ fontSize: 13, fill: '#595959'}} axisLine={false} tickLine={false}/>
+            <YAxis hide/>
+            <Tooltip formatter={(value) => typeof value === 'number' ? [`$${value.toLocaleString('es-AR')}, 'Acumulado`] : [value, '']}/>
             <Bar dataKey="acumulado" radius={[4, 4, 0, 0]}>
               {datosGrafico.map((_, i) => (
-                <Cell key={i} fill="#EB0A1E" />
+                <Cell key={i} fill="#EB0A1E"/>
               ))}
             </Bar>
           </BarChart>

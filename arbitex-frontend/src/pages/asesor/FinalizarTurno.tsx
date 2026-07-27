@@ -1,6 +1,9 @@
 import { useState } from "react";
 import '../../styles/FinalizarTurno.css'
-type Item = {
+
+//En typescript cuando hacemos type ... definimos como debe ser un objeto
+//Cuando typescript compila el codigo a javascript, los types no existen mas, solo sirven para detectar errores y hacer las coas mas limpias
+type Item = { 
     descripcion: string
     cantidad: number
     precio_unitario: number
@@ -21,7 +24,8 @@ function FinalizarTurno({ idTurno, cliente, tipoService, onFinalizado, onCancela
     ])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-
+    
+    //en la variable con todos los items agregamos un espacio mas 
     function agregarItem(){
         setItems([...items, {descripcion: '', cantidad: 1, precio_unitario: 0, tipo: 'repuesto'}])
     }
@@ -31,14 +35,16 @@ function FinalizarTurno({ idTurno, cliente, tipoService, onFinalizado, onCancela
     }
 
     function handleItemChange(index: number, campo: keyof Item, valor: string | number){
-        const nuevos = [...items]
-        nuevos[index] = {...nuevos[index], [campo]: valor}
+        const nuevos = [...items] //creamos un espacio con todos los items primero, como un backup
+        nuevos[index] = {...nuevos[index], [campo]: valor} //en el item con el index pasado desde front se modifica el campo especifico
         setItems(nuevos)
     }
 
-    const total = items.reduce((sum, item) => sum + item.cantidad * item.precio_unitario, 0)
+    const total = items.reduce((sum, item) => sum + item.cantidad * item.precio_unitario, 0) //calculamos el total del turno
+
+
     async function handleFinalizar() {
-        const itemsInvalidos = items.some(i => !i.descripcion || i.cantidad <= 0 || i.precio_unitario <= 0)
+        const itemsInvalidos = items.some(i => !i.descripcion || i.cantidad <= 0 || i.precio_unitario <= 0) //verificamos que todos los items esten con datos correctos
         if(itemsInvalidos){
             setError('Completa todos los items correctamente')
             return
@@ -47,6 +53,7 @@ function FinalizarTurno({ idTurno, cliente, tipoService, onFinalizado, onCancela
         setError('')
 
         try{
+            //hacemos el post al backend para finalizar el turno
             const token = localStorage.getItem('token')
             const res = await fetch(`http://localhost:3000/asesor/turnos/${idTurno}/finalizar`, {
                 method: 'PUT',
@@ -97,8 +104,8 @@ function FinalizarTurno({ idTurno, cliente, tipoService, onFinalizado, onCancela
                                 <input type="text" className="item-input" placeholder="Descripcion" value={item.descripcion} onChange={(e) => handleItemChange(i, 'descripcion', e.target.value)} />
 
                                 <div className="item-fila">
-                                    <input type="number" className="item-input item-numero" placeholder="Cantidad" value={item.cantidad} onChange={(e) => handleItemChange(i, 'cantidad', parseFloat(e.target.value))}/>
-                                    <input type="number" className="item-input item-numero" placeholder="Precio unitario" value={item.precio_unitario} onChange={(e) => handleItemChange(i, 'precio_unitario', parseFloat(e.target.value))} />
+                                    <input type="number" min={1} className="item-input item-numero" placeholder="Cantidad" value={item.cantidad} onChange={(e) => handleItemChange(i, 'cantidad', parseFloat(e.target.value))}/>
+                                    <input type="number" min={1} className="item-input item-numero" placeholder="Precio unitario" value={item.precio_unitario} onChange={(e) => handleItemChange(i, 'precio_unitario', parseFloat(e.target.value))} />
                                 </div>
                             </div>
                         ))
@@ -110,7 +117,7 @@ function FinalizarTurno({ idTurno, cliente, tipoService, onFinalizado, onCancela
 
                 <div className="finalizar-total">
                     <span>Total</span>
-                    <span>${total.toLocaleString('es-AR')}</span>
+                    <span>${total ? total.toLocaleString('es-AR') : 0}</span>
                 </div>
                 <div className="finalizar-botones">
                     <button className="finalizar-btn-cancelar" onClick={onCancelar}>

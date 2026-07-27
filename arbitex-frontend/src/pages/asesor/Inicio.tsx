@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import '../../styles/Inicio.css'
 import FinalizarTurno from "./FinalizarTurno";
+
+//En typescript cuando hacemos type ... definimos como debe ser un objeto
+//Cuando typescript compila el codigo a javascript, los types no existen mas, solo sirven para detectar errores y hacer las coas mas limpias
 type Turno = {
   id: number,
   hora_carga: string,
@@ -28,11 +31,11 @@ function Inicio(){
   const [turnos, setTurnos] = useState<Turno[]>([])
   const [turnoActual, setTurnoActual] = useState<Turno | null>(null)
   const [turnoFinalizando, setTurnoFinalizando] = useState<Turno | null>(null)
-  const [loading, setLoading] = useState(true)
   const nombre = localStorage.getItem('nombre') || 'Asesor'
-
   useEffect(() => {
     CargarTurnos()
+    const intervalo = setInterval(CargarTurnos, 15000) //cada 15 segundos
+    return () => clearInterval(intervalo)
   }, [])
 
   async function  CargarTurnos() {
@@ -48,32 +51,11 @@ function Inicio(){
       setTurnos(data)
 
       //El turno actual es el primero en estado asignado
-      const actual = data.find((t: Turno) => t.estado === 'asignado' || t.estado === 'en_proceso') || null
+      const actual = data.find((t: Turno) => t.estado === 'en_proceso') || null
       setTurnoActual(actual)
     }catch(err){
       console.error(err)
-    }finally{
-      setLoading(false)
     }
-  }
-
-  async function iniciarAtencion(){
-    if(!turnoActual) return
-
-    try{
-      const token = localStorage.getItem('token')
-      await fetch(`http://localhost:3000/asesor/turnos/${turnoActual.id}/iniciar`,{
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`}
-      })
-      CargarTurnos()
-    }catch(err){
-      console.error(err)
-    }
-  }
-
-  if(loading){
-    return <p className="seccion-titulo">Cargando...</p>
   }
 
   if (turnoFinalizando) {
@@ -103,10 +85,7 @@ function Inicio(){
                 <p className="turno-actual-detalle">{turnoActual.vehiculo} * {turnoActual.tipo_service}</p>
               </div>
             </div>
-            {turnoActual.estado === 'asignado' && (
-              <button className="btn-iniciar" onClick={iniciarAtencion}>Iniciar Atención</button>
-            )}
-
+        
             {turnoActual.estado === 'en_proceso' && (
               <button className="btn-finalizar" onClick={() => setTurnoFinalizando(turnoActual)}>Finalizar atencion</button>
             )}

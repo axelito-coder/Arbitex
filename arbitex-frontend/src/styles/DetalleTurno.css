@@ -1,0 +1,131 @@
+.detalle {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.detalle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detalle-volver {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #595959;
+  cursor: pointer;
+}
+
+.detalle-pdf {
+  padding: 8px 16px;
+  background: #EB0A1E;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.detalle-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 28px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.detalle-titulo {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #EB0A1E;
+}
+
+.detalle-nombre {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #EB0A1E;
+  letter-spacing: 4px;
+}
+
+.detalle-subtitulo {
+  font-size: 14px;
+  color: #595959;
+  margin-top: 4px;
+}
+
+.detalle-factura {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.detalle-seccion {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.detalle-label {
+  font-size: 11px;
+  color: #595959;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.detalle-valor {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.detalle-sub {
+  font-size: 13px;
+  color: #595959;
+  margin-top: 2px;
+}
+
+.detalle-totales {
+  margin-top: 20px;
+  padding-top: 16px;
+}
+
+.detalle-total-fila {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1A1A1A;
+  padding: 8px 0;
+}
+
+.detalle-comision {
+  font-size: 13px;
+  font-weight: 400;
+  color: #595959;
+}
+
+@media print {
+  .detalle-header { display: none; }
+  .detalle-card { box-shadow: none; }
+
+  body * {
+    visibility: hidden;
+  }
+  #detalle-imprimible, #detalle-imprimible * {visibility: visible;}
+  #detalle-imprimible {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

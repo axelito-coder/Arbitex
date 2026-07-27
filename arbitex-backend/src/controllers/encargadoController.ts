@@ -2,6 +2,45 @@ import { Response } from 'express'
 import pool from '../db'
 import { RequestConUsuario } from '../middlewares/authMiddleware'
 
+
+export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
+    const { id } = req.params
+
+    try{
+        const turnoResult = await pool.query(`
+            SELECT t.id, t.fecha, t.hora_carga, t.hora_inicio_atencion, t.hora_cierre_atencion,
+              t.duracion_minutos, t.tipo_service, t.estado, t.es_compensacion,
+              c.nombre AS cliente, c.cuit, c.telefono, c.condicion_iva,
+              v.marca, v.modelo, v.version,
+              vc.nro_serie, vc.km,
+              u.nombre AS asesor,
+              f.nro_factura, f.total,
+              co.monto AS comision
+            FROM turnos t
+            JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
+            JOIN clientes c ON c.id = vc.id_cliente
+            JOIN vehiculos v ON v.id = vc.id_vehiculo
+            LEFT JOIN empleados e ON e.id = t.id_asesor
+            LEFT JOIN usuarios u ON u.id = e.id_usuario
+            LEFT JOIN facturas f ON f.id_turno = t.id
+            LEFT JOIN comisiones co ON co.id_factura = f.id
+            WHERE t.id = $1
+        `, [id])
+        if(turnoResult.rows.length === 0){
+            return res.status(404).json({ mensaje: 'Turno no encontrado'})
+        }
+        const itemsResult = await pool.query(`
+            SELECT descripcion, cantidad, precio_unitario, tipo
+            FROM items_turno
+            WHERE id_turno = $1
+        `, [id])
+        return res.json({...turnoResult.rows[0], items: itemsResult.rows})
+    }catch (err){
+        console.error(err)
+        return res.status(500).json({ mensaje: 'Error interno del servidor'})
+    }
+}
+
 // Obtener todos los turnos del día
 export async function getTurnosHoy(req: RequestConUsuario, res: Response) {
   try {
@@ -9,7 +48,13 @@ export async function getTurnosHoy(req: RequestConUsuario, res: Response) {
       SELECT t.id, t.hora_carga, t.tipo_service, t.estado, t.es_compensacion,
        c.nombre AS cliente,
        v.marca || ' ' || v.modelo || ' ' || COALESCE(v.version, '') AS vehiculo,
-       u.nombre AS asesor
+       u.nombre AS asesor,
+       CASE
+        WHEN t.estado = 'finalizado' THEN t.duracion_minutos
+        WHEN t.estado = 'en_proceso' AND t.hora_inicio_atencion IS NOT NULL
+        THEN EXTRACT(EPOCH FROM(NOW() - t.hora_inicio_atencion)) / 60
+        ELSE NULL
+        END as duracion
       FROM turnos t
       JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
       JOIN clientes c ON c.id = vc.id_cliente
@@ -17,7 +62,7 @@ export async function getTurnosHoy(req: RequestConUsuario, res: Response) {
       LEFT JOIN empleados e ON e.id = t.id_asesor
       LEFT JOIN usuarios u ON u.id = e.id_usuario
       WHERE t.fecha = CURRENT_DATE
-      ORDER BY t.horario ASC NULLS LAST
+      ORDER BY t.hora_carga ASC NULLS LAST
     `)
 
     return res.json(result.rows)
@@ -58,11 +103,15 @@ export async function  getPanelAsesores(req: RequestConUsuario, res: Response) {
 export async function  getHistorial(req: RequestConUsuario, res: Response) {
     try{
         const result = await pool.query(`
-            SELECT t.id, t.fecha, t.horario, t.tipo_service, t.estado,
-            t.duracion_minutos, t.es_compensacion,
+            SELECT t.id, t.fecha, t.tipo_service, t.estado,
+            t.es_compensacion,
             c.nombre AS cliente,
             v.marca || ' ' || v.modelo AS vehiculo,
-            u.nombre AS asesor
+            u.nombre AS asesor,
+            CASE
+              WHEN t.estado = 'finalizado' THEN t.duracion_minutos
+              ELSE NULL
+              END AS duracion
             FROM turnos t
             JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
             JOIN clientes c ON c.id = vc.id_cliente
@@ -71,7 +120,7 @@ export async function  getHistorial(req: RequestConUsuario, res: Response) {
             LEFT JOIN usuarios u ON u.id = e.id_usuario
             WHERE t.fecha >= DATE_TRUNC('week', CURRENT_DATE)
             AND t.fecha < DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '7 days'
-            ORDER BY t.fecha ASC, t.horario ASC NULLS LAST
+            ORDER BY t.fecha ASC, t.hora_carga ASC NULLS LAST
         `)
 
         return res.json(result.rows)

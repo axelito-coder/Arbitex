@@ -57,6 +57,7 @@
 
 .login-campo {
   margin-bottom: 20px;
+  color: #FFFFFF
 }
 
 .login-label {
@@ -121,6 +122,9 @@
 .login-btn-loading {
   background: rgba(235,10,30,0.5);
   cursor: not-allowed;
+}
+.login-label{
+  color: #FFFFFF;
 }
 
 /* FOOTER */

@@ -1,4 +1,5 @@
 import '../../styles/MisTurnos.css'
+import DetalleTurno from '../../components/DetalleTurno'
 import { useEffect, useState } from 'react'
 
 type Turno = {
@@ -23,6 +24,7 @@ function getClaseEstado(estado: string) {
 }
 
 function MisTurnos() {
+  const [turnoDetalle, setTurnoDetalle] = useState<number | null>(null)
   const [turnos, setTurnos] = useState<Turno[]>([])
   const [loading, setLoading] = useState(true)
   useEffect(() => {
@@ -52,6 +54,12 @@ function MisTurnos() {
 
   if(loading){
     return <p className='seccion-titulo'>Cargando...</p>
+  }
+
+  if(turnoDetalle){
+    return(
+      <DetalleTurno idTurno={turnoDetalle} onVolver={() => setTurnoDetalle(null)} urlBase='http://localhost:3000/asesor'/>
+    )
   }
   return (
     <div className="mis-turnos">
@@ -88,7 +96,7 @@ function MisTurnos() {
                 <tr><td colSpan={6} className='sin-datos'>No tenes turnos esat semana...</td></tr>
               ): (
                 turnos.map((t) => (
-                <tr key={t.id}>
+                <tr key={t.id} onClick={() => setTurnoDetalle(t.id)} style={{cursor: 'pointer'}}>
                   <td>{t.hora_carga ? new Date(t.hora_carga).toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'}) : '-'}</td>
                   <td>{t.cliente}</td>
                   <td>{t.vehiculo}</td>
