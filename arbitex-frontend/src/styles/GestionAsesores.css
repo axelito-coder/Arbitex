@@ -1,0 +1,144 @@
+.gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gestion-btn-nuevo {
+  padding: 8px 16px;
+  background: #EB0A1E;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.gestion-exito {
+  padding: 10px 14px;
+  background: #D1FAE5;
+  border-left: 4px solid #10B981;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #065F46;
+}
+
+.gestion-btn-editar {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #595959;
+  cursor: pointer;
+}
+
+.gestion-btn-desactivar {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid #EB0A1E;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #EB0A1E;
+  cursor: pointer;
+}
+
+.gestion-form {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.gestion-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 28px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.gestion-titulo {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin-bottom: 20px;
+}
+
+.gestion-error {
+  padding: 10px 14px;
+  background: #FEE2E2;
+  border-left: 4px solid #EB0A1E;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #EB0A1E;
+  margin-bottom: 16px;
+}
+
+.gestion-campo {
+  margin-bottom: 16px;
+}
+
+.gestion-label {
+  display: block;
+  font-size: 12px;
+  color: #595959;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.gestion-opcional {
+  font-weight: 400;
+  color: #888;
+}
+
+.gestion-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1A1A1A;
+  box-sizing: border-box;
+}
+
+.gestion-input:focus {
+  outline: none;
+  border-color: #EB0A1E;
+}
+
+.gestion-botones {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.gestion-btn-cancelar {
+  flex: 1;
+  padding: 11px;
+  background: #F5F5F5;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #595959;
+  cursor: pointer;
+}
+
+.gestion-btn-guardar {
+  flex: 2;
+  padding: 11px;
+  background: #EB0A1E;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #FFFFFF;
+  cursor: pointer;
+}

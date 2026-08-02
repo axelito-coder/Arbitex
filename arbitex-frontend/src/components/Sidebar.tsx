@@ -20,6 +20,7 @@ function Sidebar({ pagina, setPagina, rol,}: Props) {
     { id: 'cargar',    label: 'Cargar Turno'   },
     { id: 'asesores',  label: 'Panel Asesores' },
     { id: 'historial', label: 'Historial'      },
+    {id: 'asesores-gestion', label: 'Gestion Asesores'}
   ]
 
   const links = rol === 'encargado' ? linksEncargado : linksAsesor

@@ -10,6 +10,7 @@ import PanelAsesores from './pages/encargado/PanelAsesores'
 import Historial from './pages/encargado/Historial'
 import Login from './pages/Login'
 import './App.css'
+import GestionAsesores from './pages/encargado/GestionAsesores'
 
 function App() {
   const [sidebar, setSidebar] = useState(true)
@@ -43,6 +44,7 @@ function App() {
           {pagina === 'cargar'    && <CargarTurno />}
           {pagina === 'asesores'  && <PanelAsesores />}
           {pagina === 'historial' && <Historial />}
+          {pagina === 'asesores-gestion' && <GestionAsesores/>}
           {pagina === 'inicio'    && <Inicio />}
           {pagina === 'turnos'    && <MisTurnos />}
           {pagina === 'perfil'    && <MiPerfil />}

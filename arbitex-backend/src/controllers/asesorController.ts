@@ -78,7 +78,7 @@ export async function  getPerfil(req: RequestConUsuario, res: Response) {
 export async function  getTurnosHoy(req: RequestConUsuario, res: Response) {
     try{
         const result = await pool.query(`
-            SELECT t.id, t.horario, t.tipo_service, t.estado, t.hora_inicio_atencion,
+            SELECT t.id, t.hora_carga, t.tipo_service, t.estado, t.hora_inicio_atencion,
             t.hora_cierre_atencion, t.duracion_minutos,
             c.nombre AS cliente,
             v.marca || ' ' || v.modelo || ' ' || COALESCE(v.version, '') AS vehiculo
@@ -226,6 +226,7 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
               WHERE id_asesor = (SELECT id FROM empleados WHERE id_usuario = $1)
               AND estado = 'finalizado'
               AND duracion_minutos IS NOT NULL
+              AND fecha >= DATE_TRUNC('week', CURRENT_DATE)
             )
             WHERE id_usuario = $1
         `, [req.usuario?.id])

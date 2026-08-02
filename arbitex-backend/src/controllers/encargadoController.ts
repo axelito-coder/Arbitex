@@ -77,7 +77,7 @@ export async function getTurnosHoy(req: RequestConUsuario, res: Response) {
 export async function  getPanelAsesores(req: RequestConUsuario, res: Response) {
     try{
         const result = await pool.query(`
-            SELECT u.nombre, e.acumulado_semanal, e.sesion_activa,
+            SELECT u.id AS id_usuario, u.nombre, u.email, e.acumulado_semanal, e.sesion_activa,
             e.tiempo_promedio, e.orden_compensacion,
             (e.acumulado_semanal * 0.01) AS comision,
             COUNT(t.id) FILTER (WHERE t.fecha = CURRENT_DATE) AS turnos_hoy,
@@ -85,7 +85,7 @@ export async function  getPanelAsesores(req: RequestConUsuario, res: Response) {
             FROM empleados e
             JOIN usuarios u ON u.id = e.id_usuario
             LEFT JOIN turnos t ON t.id_asesor = e.id
-            GROUP BY u.nombre, e.acumulado_semanal, e.sesion_activa,
+            GROUP BY u.id, u.nombre, u.email, e.acumulado_semanal, e.sesion_activa,
                      e.tiempo_promedio, e.orden_compensacion
             ORDER BY e.acumulado_semanal ASC    
         `)
@@ -183,6 +183,89 @@ export async function cargarTurno(req: RequestConUsuario, res: Response) {
     return res.status(201).json(result.rows[0])
 
   } catch (err) {
+    console.error(err)
+    return res.status(500).json({ mensaje: 'Error interno del servidor' })
+  }
+}
+
+
+//Crear asesor
+export async function  crearAsesor(req: RequestConUsuario, res: Response) {
+  const { nombre, email, password } = req.body
+
+  if(!nombre || !email || !password){
+    return res.status(400).json({ mensaje: 'Faltan datos requeridos' })
+  }
+
+  try{
+    const bcrypt = require('bcryptjs')
+    const hash = await bcrypt.hash(password, 10)
+
+    const existe = await pool.query(`
+      SELECT id FROM usuarios WHERE email = $1
+    `, [email])
+    if(existe.rows.length > 0){
+      return res.status(400).json({ mensaje: 'El email ya esta en uso' })
+    }
+
+    const result = await pool.query(`
+      INSERT INTO usuarios (nombre, email, password, rol)
+      VALUES ($1, $2, $3, 'asesor')
+      RETURNING id
+    `, [nombre, email, hash])
+
+    await pool.query(`
+      INSERT INTO empleados (id_usuario)
+      VALUES ($1)
+    `, [result.rows[0].id])
+    //como en la base de datos, asesor tiene valores default para los acumulados no hay problema de null
+    //el orden de compensacion nuevo se recalcula el lunes que viene, el null de ese campo no afecta si empieza otro dia.
+    return res.status(201).json({ mensaje: 'Asesor creado correctamente' })
+  }catch(err){
+    console.error(err)
+    return res.status(500).json({ mensaje: 'Error interno del servidor' })
+  }
+}
+
+export async function editarAsesor(req: RequestConUsuario, res: Response) {
+  const { id } = req.params
+  const { nombre, email, password } = req.body
+  console.log('editarAsesor id:', id, 'body:', req.body)
+  try{
+    const existe = await pool.query(`
+      SELECT id FROM usuarios WHERE email = $1 AND id != $2
+    `, [email, id])
+    if(existe.rows.length > 0){
+      return res.status(400).json({ mensaje: 'El email ya esta en uso' })
+    }
+    await pool.query(`
+      UPDATE usuarios SET nombre = $1, email = $2 WHERE id = $3
+    `, [nombre, email, id])
+
+    if(password){
+      const bcrypt = require('bcryptjs')
+      const hash = await bcrypt.hash(password, 10)
+      await pool.query(`
+        UPDATE usuarios SET password = $1 WHERE id = $2
+      `, [hash, id])
+    }
+    return res.json({ mensaje: 'Asesor actualizado correctamente'})
+  }catch(err){
+    console.error(err)
+    return res.status(500).json({ mensaje: 'Error interno del servidor'})
+  }
+}
+
+export async function  desactivarAsesor(req: RequestConUsuario, res: Response) {
+  const { id } = req.params
+
+  try{
+    await pool.query(`
+      UPDATE empleados SET sesion_activa = false
+      WHERE id_usuario = $1
+    `, [id])
+    return res.json({ mensaje: 'Asesor desactivado correctamente'})
+  }catch(err){
     console.error(err)
     return res.status(500).json({ mensaje: 'Error interno del servidor' })
   }
