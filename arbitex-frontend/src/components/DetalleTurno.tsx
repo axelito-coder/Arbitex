@@ -15,21 +15,21 @@ type Item = {
 //para trabajar con todo el turno
 type Detalle = {
     id: number,
-    fecha: String,
-    hora_carga: String,
-    tipo_service: String
-    estado: String,
-    cliente: String,
-    cuit: String,
-    telefono: String,
-    condicion_iva: String,
-    marca: String,
-    modelo: String,
-    version: String,
-    nro_serie: String,
+    fecha: string,
+    hora_carga: string,
+    tipo_service: string
+    estado: string,
+    cliente: string,
+    email: string | null,
+    telefono: string | null,
+    marca: string,
+    modelo: string,
+    version: string,
+    nro_serie: string,
     km: number,
-    asesor: String,
-    nro_factura: String
+    patente: string | null,
+    asesor: string,
+    nro_factura: string
     total: number,
     comision: number,
     duracion_minutos: number | null
@@ -41,6 +41,14 @@ type Props = {
     idTurno: number,
     onVolver: () => void
     urlBase: string //la url porque asesor y encargado tienen en sus respectivos rutas y controladores una funcion para traer todo el turno
+}
+function formatearFecha(fechaISO: string){
+  const fecha = new Date(fechaISO)
+  return fecha.toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
 }
 
 function DetalleTurno({ idTurno, onVolver, urlBase }: Props){
@@ -82,22 +90,22 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props){
                     <p className='detalle-nombre'>Arbitex</p>
                     <p className='detalle-subtitulo'>Orden de service #{detalle.id}</p>
                     {detalle.nro_factura && <p className='detalle-factura'>Factura {detalle.nro_factura}</p>}
+                    {detalle.fecha && <p className='detalle-factura'>{formatearFecha(detalle.fecha)}</p>}
                 </div>
 
                 <div className='detalle-seccion'>
                     <p className='detalle-label'>Cliente</p>
                     <p className='detalle-valor'>{detalle.cliente}</p>
-                    {detalle.cuit && <p className='detalle-sub'>CUIT: {detalle.cuit}</p>}
+                    {detalle.email && <p className='detalle-sub'>Email: {detalle.email}</p>}
                     {detalle.telefono && <p className='detalle-sub'>Tel: {detalle.telefono}</p>}
-                    {detalle.condicion_iva && <p className='detalle-sub'>CUIT: {detalle.condicion_iva}</p>}
                 </div>
 
                 <div className='detalle-seccion'>
                     <p className='detalle-label'>Vehiculo</p>
-                    <p className='detalle-valor'>{detalle.marca} {detalle.modelo}</p>
+                    <p className='detalle-valor'>{detalle.marca} {detalle.modelo} {detalle.patente}</p>
                     {detalle.version && <p className='detalle-sub'>Version: {detalle.version}</p>}
-                    {detalle.nro_serie && <p className='detalle-sub'>Tel: {detalle.nro_serie}</p>}
-                    {detalle.km && <p className='detalle-sub'>CUIT: {detalle.km.toLocaleString('es-AR')}</p>}
+                    {detalle.nro_serie && <p className='detalle-sub'>nro_serie: {detalle.nro_serie}</p>}
+                    {detalle.km && <p className='detalle-sub'>KM: {detalle.km.toLocaleString('es-AR')}</p>}
                 </div>
 
 
@@ -107,7 +115,6 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props){
                     <p className='detalle-sub'>{detalle.asesor}</p>
                     {detalle.duracion_minutos && <p className='detalle-sub'>Duracion: {Math.round(detalle.duracion_minutos)} min</p>}
                     {detalle.telefono && <p className='detalle-sub'>Tel: {detalle.telefono}</p>}
-                    {detalle.condicion_iva && <p className='detalle-sub'>CUIT: {detalle.condicion_iva}</p>}
                 </div>
 
                 {detalle.items && detalle.items.length > 0 && (

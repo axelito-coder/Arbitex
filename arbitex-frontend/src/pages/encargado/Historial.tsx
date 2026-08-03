@@ -22,6 +22,14 @@ function getClaseEstado(estado: string) {
   return 'badge badge-gris'
 }
 
+function formatearFecha(fechaISO: string){
+  const fecha = new Date(fechaISO)
+  return fecha.toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+}
 function Historial() {
   const [turnoDetalle, setTurnoDetalle] = useState<number | null >(null) 
   const [turnos, setTurnos] = useState<Turno[]>([])
@@ -102,7 +110,6 @@ const asesores = [...new Set(turnos.map(t => t.asesor).filter(Boolean))]
             <thead>
               <tr>
                 <th>Fecha</th>
-                <th>Hora</th>
                 <th>Cliente</th>
                 <th>Vehículo</th>
                 <th>Service</th>
@@ -119,8 +126,7 @@ const asesores = [...new Set(turnos.map(t => t.asesor).filter(Boolean))]
               ) : (
                 turnosFiltrados.map((t) => (
                   <tr key={t.id} onClick={() => setTurnoDetalle(t.id)} style={{cursor: 'pointer'}}>
-                    <td>{t.fecha}</td>
-                    <td>{t.hora_carga}</td>
+                    <td>{formatearFecha(t.fecha)}</td>
                     <td>{t.cliente}</td>
                     <td>{t.vehiculo}</td>
                     <td>{t.tipo_service}</td>

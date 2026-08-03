@@ -184,8 +184,9 @@ export async function cargarTurno(req: RequestConUsuario, res: Response) {
     const idCliente = clienteResult.rows[0].id
 
     // 2. Crear o buscar vehículo
-    let idVehiculo
-    const vehiculoExiste = await pool.query(`
+    let idVehiculo //tenemos dos tablas, una de vehiculos de los clientes y otra de los vehiculos pero sin duplicar por cada cliente, 
+    //lo de la tabla sin duplicar es para hacer despues algo de estadistica pero como es algo que todavia no sabemos si hacer o no , por ahora queda así
+    const vehiculoExiste = await pool.query(` 
       SELECT id FROM vehiculos
       WHERE marca = $1 AND modelo = $2 AND COALESCE(version, '') = $3
     `, [marca || 'Sin especificar', modelo || 'Sin especificar', version || ''])

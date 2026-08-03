@@ -10,9 +10,9 @@ export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
         const turnoResult = await pool.query(`
             SELECT t.id, t.fecha, t.hora_carga, t.hora_inicio_atencion, t.hora_cierre_atencion,
               t.duracion_minutos, t.tipo_service, t.estado, t.es_compensacion,
-              c.nombre AS cliente, c.cuit, c.telefono, c.condicion_iva,
+              c.nombre AS cliente, c.telefono, c.email,
               v.marca, v.modelo, v.version,
-              vc.nro_serie, vc.km,
+              vc.nro_serie, vc.km, vc.patente,
               u.nombre AS asesor,
               f.nro_factura, f.total,
               co.monto AS comision
@@ -102,7 +102,7 @@ export async function  getTurnosHoy(req: RequestConUsuario, res: Response) {
 export async function getTurnosSemana(req: RequestConUsuario, res: Response) {
   try {
     const result = await pool.query(`
-      SELECT t.id, t.fecha, t.horario, t.tipo_service, t.estado,
+      SELECT t.id, t.fecha, t.hora_carga, t.tipo_service, t.estado,
              t.hora_inicio_atencion, t.hora_cierre_atencion, t.duracion_minutos,
              c.nombre AS cliente,
              v.marca || ' ' || v.modelo || ' ' || COALESCE(v.version, '') AS vehiculo
@@ -114,7 +114,7 @@ export async function getTurnosSemana(req: RequestConUsuario, res: Response) {
       WHERE e.id_usuario = $1
       AND t.fecha >= DATE_TRUNC('week', CURRENT_DATE)
       AND t.fecha < DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '7 days'
-      ORDER BY t.fecha ASC, t.horario ASC NULLS LAST
+      ORDER BY t.fecha ASC, t.hora_carga ASC NULLS LAST
     `, [req.usuario?.id])
 
     return res.json(result.rows)
@@ -154,7 +154,8 @@ export async function  iniciarAtencion(req: RequestConUsuario, res: Response) {
 
 export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
     const { id } = req.params
-    const { items } = req.body
+    const { items, contacto, patente } = req.body
+    console.log('patente recibida', patente)
     // items: [{Descripcion, cantidad, precio_unitario, tipo}]
 
     if(!items || items.length === 0){
@@ -230,6 +231,27 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
             )
             WHERE id_usuario = $1
         `, [req.usuario?.id])
+
+        if(contacto && (contacto.email || contacto.telefono)){
+            await pool.query(`
+                UPDATE clientes c
+                SET email = COALESCE(NULLIF($1, ''), c.email),
+                    telefono = COALESCE(NULLIF($2, ''), c.telefono)
+                FROM turnos t
+                JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
+                WHERE t.id = $3
+                AND c.id = vc.id_cliente
+            `, [contacto.email || '', contacto.telefono || '', id])
+        }
+        if(patente){
+            await pool.query(`
+                UPDATE vehiculo_cliente vc
+                SET patente = $1
+                FROM turnos t
+                WHERE t.id = $2
+                AND vc.id = t.id_vehiculo_cliente
+            `, [patente, id])
+        }
 
         return res.json({ mensaje: 'Turno finalizado correctamente', total, comision: monto})
     }catch (err){

@@ -22,7 +22,14 @@ function getClaseEstado(estado: string) {
   if (estado === 'anulado')        return 'badge badge-rojo'
   return 'badge badge-gris'
 }
-
+function formatearFecha(fechaISO: string){
+  const fecha = new Date(fechaISO)
+  return fecha.toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+}
 function MisTurnos() {
   const [turnoDetalle, setTurnoDetalle] = useState<number | null>(null)
   const [turnos, setTurnos] = useState<Turno[]>([])
@@ -87,7 +94,7 @@ function MisTurnos() {
           <table className="tabla">
             <thead>
               <tr>
-                <th>Hora</th><th>Cliente</th><th>Vehículo</th><th>Service</th>
+                <th>Fecha</th><th>Hora</th><th>Cliente</th><th>Vehículo</th><th>Service</th>
                 <th>Estado</th><th>Duración</th>
               </tr>
             </thead>
@@ -97,6 +104,7 @@ function MisTurnos() {
               ): (
                 turnos.map((t) => (
                 <tr key={t.id} onClick={() => setTurnoDetalle(t.id)} style={{cursor: 'pointer'}}>
+                  <td>{formatearFecha(t.fecha)}</td>
                   <td>{t.hora_carga ? new Date(t.hora_carga).toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'}) : '-'}</td>
                   <td>{t.cliente}</td>
                   <td>{t.vehiculo}</td>
