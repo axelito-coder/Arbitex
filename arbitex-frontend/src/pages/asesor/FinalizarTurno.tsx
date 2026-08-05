@@ -24,8 +24,14 @@ function FinalizarTurno({ idTurno, cliente, tipoService, onFinalizado, onCancela
     ])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    const [contacto, setContacto] = useState({email: '', telefono: ''})
     const [patente, setPatente] = useState('')
+    const [vehiculo, setVehiculo] = useState({
+        marca: '',
+        modelo: '',
+        version: '',
+        nro_serie: '',
+        km: ''
+    })
     
     //en la variable con todos los items agregamos un espacio mas 
     function agregarItem(){
@@ -54,9 +60,6 @@ function FinalizarTurno({ idTurno, cliente, tipoService, onFinalizado, onCancela
         if(!patente){
             setError('Patente obligatoria')
         }
-        if(!contacto.email || !contacto.telefono){
-            setError('contacto necesario')
-        }
         setLoading(true)
         setError('')
 
@@ -69,7 +72,7 @@ function FinalizarTurno({ idTurno, cliente, tipoService, onFinalizado, onCancela
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}` 
                 },
-                body: JSON.stringify({ items, contacto, patente })
+                body: JSON.stringify({ items, vehiculo, patente })
             })
 
             const data = await res.json()
@@ -94,6 +97,34 @@ function FinalizarTurno({ idTurno, cliente, tipoService, onFinalizado, onCancela
 
                 {error && <div className="finalizar-error">{error}</div>}
 
+                {/* DATOS DEL VEHÍCULO */}
+                <div className="finalizar-item">
+                 <p style={{ fontSize: 13, color: '#595959', marginBottom: 8, fontWeight: 600 }}>Vehículo</p>
+                
+                  <div className="item-fila">
+                    <input type="text" className="item-input" placeholder="Marca"
+                        value={vehiculo.marca} onChange={(e) => setVehiculo({...vehiculo, marca: e.target.value})}/>
+                    <input type="text" className="item-input" placeholder="Modelo"
+                        value={vehiculo.modelo} onChange={(e) => setVehiculo({...vehiculo, modelo: e.target.value})}/>
+                  </div>
+
+                  <input type="text" className="item-input" placeholder="Versión (opcional)"
+                    value={vehiculo.version} onChange={(e) => setVehiculo({...vehiculo, version: e.target.value})}
+                    style={{ marginTop: 8 }}/>
+
+                  <div className="item-fila" style={{ marginTop: 8 }}>
+                    <input type="text" className="item-input" placeholder="Patente"
+                        value={patente} onChange={(e) => setPatente(e.target.value.toUpperCase())}/>
+                    <input type="number" className="item-input" placeholder="KM"
+                        value={vehiculo.km} onChange={(e) => setVehiculo({...vehiculo, km: e.target.value})}/>
+                  </div>
+
+                  <input type="text" className="item-input" placeholder="Nro. de serie (opcional)"
+                    value={vehiculo.nro_serie} onChange={(e) => setVehiculo({...vehiculo, nro_serie: e.target.value})}
+                    style={{ marginTop: 8 }}/>
+                </div>
+
+                {/*ITEMS*/}
                 <div className="finalizar-items">
                     {
                         items.map((item, i) => (
@@ -128,12 +159,6 @@ function FinalizarTurno({ idTurno, cliente, tipoService, onFinalizado, onCancela
                     <span>${total ? total.toLocaleString('es-AR') : 0}</span>
                 </div>
 
-                <div className="finalizar-item">
-                    <p className="cliente-datos" style={{fontSize: 13, color: '#595959', marginBottom: 8}}>Datos de cliente</p>
-                    <input type="text" className="item-input" placeholder="Patente..." value={patente} onChange={(e) => setPatente(e.target.value)} />
-                    <input type="email" className="item-input" placeholder="Email de cliente" value={contacto.email} onChange={(e) => setContacto({...contacto, email: e.target.value})} />
-                    <input type="text" className="item-input" placeholder="Teléfono..." value={contacto.telefono} onChange={(e) => setContacto({...contacto, telefono: e.target.value})} />
-                </div>
                 <div className="finalizar-botones">
                     <button className="finalizar-btn-cancelar" onClick={onCancelar}>
                         Cancelar

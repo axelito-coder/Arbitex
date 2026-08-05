@@ -4,9 +4,18 @@ import { RequestConUsuario } from '../middlewares/authMiddleware'
 //FUNCIONES AUXILIARES
 
 function getNumeroSemana(fecha: Date): number { //Obtenemos el numero de la semana para despues verificar el nuevo inicio de semana
-    const inicio = new Date(fecha.getFullYear(), 0, 1)
-    const dias = Math.floor((fecha.getTime() - inicio.getTime()) / (24 * 60 * 60 * 1000))
-    return Math.ceil((dias + inicio.getDay() + 1) / 7)
+    const lunes = new Date(fecha)
+    const dia = fecha.getDay()
+    const diff = dia === 0 ? -6 : 1 -dia //Si es domingo resta 6, sino resta lo que falta para lunes
+    lunes.setDate(fecha.getDate() + diff)
+    lunes.setHours(0, 0, 0, 0)
+
+    //Número de semana basado en el lunes
+    const jueves = new Date(lunes)
+    jueves.setDate(lunes.getDate() + 3)
+    const inicioAnio = new Date(jueves.getFullYear(), 0, 1)
+    const diff2 = jueves.getTime() - inicioAnio.getTime()
+    return Math.ceil((diff2 / 86400000 + inicioAnio.getDay() + 1) / 7)
 }
 
 async function verificarNuevaSemana(): Promise<boolean> { //verificamos que sea una nueva semana, por eso promise<boolean>
@@ -118,6 +127,18 @@ async function asignarPorCompensacion(idTurno: number, turnosHoy: number): Promi
     `, [result.rows[0].id, idTurno]) //se le asigna el turno al asesor y se determina si el turno es de compensacion
 }
 
+async function cerrarTurnosPendientes(): Promise<void> {
+    await pool.query(`
+        UPDATE turnos
+        SET estado = 'finalizado',
+           hora_cierre_atencion = NOW(),
+           duracion_minutos = EXTRACT(EPOCH FROM (NOW() - hora_inicio_atencion)) / 60
+        WHERE estado = 'en_proceso'
+        AND fecha < CURRENT_DATE
+    `)
+    console.log('Turnos en proceso anteriores cerrados')
+}
+
 async function asignarTurno(idTurno: number): Promise<void> { //funcion principal para asignar turnos
     const asesores = await pool.query(` 
         SELECT id FROM empleados WHERE sesion_activa = true
@@ -170,7 +191,7 @@ async function asignarTurno(idTurno: number): Promise<void> { //funcion principa
 
 export async function cargarTurno(req: RequestConUsuario, res: Response) {
     console.log('cargarTurno llamado', req.body)  // ← acá
-    const { nombre_cliente, marca, modelo, version, nro_serie, km, tipo_service} = req.body //se obtiene la informacion del turno desde el front
+    const { nombre_cliente, email, telefono ,tipo_service} = req.body //se obtiene la informacion del turno desde el front
 
     if(!nombre_cliente || !tipo_service){
         return res.status(400).json({ mensaje: 'Faltan datos requeridos'}) //si hay error en el front
@@ -179,33 +200,24 @@ export async function cargarTurno(req: RequestConUsuario, res: Response) {
     try {
     // 1. Crear cliente
     const clienteResult = await pool.query(`
-      INSERT INTO clientes (nombre) VALUES ($1) RETURNING id
-    `, [nombre_cliente])
+      INSERT INTO clientes (nombre, email, telefono) VALUES ($1, $2, $3) RETURNING id
+    `, [nombre_cliente, email || null, telefono || null])
     const idCliente = clienteResult.rows[0].id
 
     // 2. Crear o buscar vehículo
-    let idVehiculo //tenemos dos tablas, una de vehiculos de los clientes y otra de los vehiculos pero sin duplicar por cada cliente, 
-    //lo de la tabla sin duplicar es para hacer despues algo de estadistica pero como es algo que todavia no sabemos si hacer o no , por ahora queda así
-    const vehiculoExiste = await pool.query(` 
-      SELECT id FROM vehiculos
-      WHERE marca = $1 AND modelo = $2 AND COALESCE(version, '') = $3
-    `, [marca || 'Sin especificar', modelo || 'Sin especificar', version || ''])
+    const vehiculoResult = await pool.query(`
+        INSERT INTO vehiculos (marca, modelo) VALUES ('Sin especificar', 'Sin especificar') RETURNING id
+      `,)
+    const idVehiculo = vehiculoResult.rows[0].id
+    
 
-    if (vehiculoExiste.rows.length > 0) {
-      idVehiculo = vehiculoExiste.rows[0].id
-    } else {
-      const vehiculoResult = await pool.query(`
-        INSERT INTO vehiculos (marca, modelo, version) VALUES ($1, $2, $3) RETURNING id
-      `, [marca || 'Sin especificar', modelo || 'Sin especificar', version || null])
-      idVehiculo = vehiculoResult.rows[0].id
-    }
-
-    // 3. Crear vehiculo_cliente
     const vcResult = await pool.query(`
-      INSERT INTO vehiculo_cliente (id_vehiculo, id_cliente, nro_serie, km)
-      VALUES ($1, $2, $3, $4) RETURNING id
-    `, [idVehiculo, idCliente, nro_serie || null, km || null])
+        INSERT INTO vehiculo_cliente (id_vehiculo, id_cliente)
+        VALUES ($1, $2) RETURNING id
+    `, [idVehiculo, idCliente])
+
     const idVehiculoCliente = vcResult.rows[0].id
+
 
     // 4. Insertar turno en pendiente
     const turnoResult = await pool.query(`
@@ -220,6 +232,9 @@ export async function cargarTurno(req: RequestConUsuario, res: Response) {
     const turnosHoy = await contarTurnosHoy()
     const cantidadAsesores = await contarAsesores()
 
+    if(turnosHoy === 0){
+        await cerrarTurnosPendientes()
+    }
     console.log('esNuevaSemana:', esNuevaSemana)
     console.log('turnosHoy:', turnosHoy) 
 

@@ -154,7 +154,7 @@ export async function  iniciarAtencion(req: RequestConUsuario, res: Response) {
 
 export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
     const { id } = req.params
-    const { items, contacto, patente } = req.body
+    const { items, vehiculo, patente } = req.body
     console.log('patente recibida', patente)
     // items: [{Descripcion, cantidad, precio_unitario, tipo}]
 
@@ -232,17 +232,6 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
             WHERE id_usuario = $1
         `, [req.usuario?.id])
 
-        if(contacto && (contacto.email || contacto.telefono)){
-            await pool.query(`
-                UPDATE clientes c
-                SET email = COALESCE(NULLIF($1, ''), c.email),
-                    telefono = COALESCE(NULLIF($2, ''), c.telefono)
-                FROM turnos t
-                JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
-                WHERE t.id = $3
-                AND c.id = vc.id_cliente
-            `, [contacto.email || '', contacto.telefono || '', id])
-        }
         if(patente){
             await pool.query(`
                 UPDATE vehiculo_cliente vc
@@ -251,6 +240,29 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
                 WHERE t.id = $2
                 AND vc.id = t.id_vehiculo_cliente
             `, [patente, id])
+        }
+
+        if(vehiculo && (vehiculo.marca || vehiculo.modelo)){
+            await pool.query(`
+                UPDATE vehiculos v
+                SET marca = COALESCE(NULLIF($1, ''), v.marca),
+                    modelo = COALESCE(NULLIF($2, ''), v.modelo),
+                    version = COALESCE(NULLIF($3, ''), v.version)
+                FROM turnos t
+                JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
+                WHERE t.id = $4
+                AND v.id = vc.id_vehiculo
+            `, [vehiculo.marca || '', vehiculo.modelo || '', vehiculo.version || '', id])
+
+            await pool.query(`
+                UPDATE vehiculo_cliente vc
+                SET patente = COALESCE(NULLIF($1, ''), vc.patente),
+                    nro_serie = COALESCE(NULLIF($2, ''), vc.nro_serie),
+                    km = CASE WHEN $3 > 0 THEN $3 ELSE vc.km END
+                FROM turnos t
+                WHERE t.id = $4
+                AND vc.id = t.id_vehiculo_cliente
+            `, [patente || '', vehiculo.nro_serie || '', parseInt(vehiculo.km) || 0, id])
         }
 
         return res.json({ mensaje: 'Turno finalizado correctamente', total, comision: monto})

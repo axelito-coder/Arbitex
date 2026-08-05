@@ -10,7 +10,7 @@ export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
         const turnoResult = await pool.query(`
             SELECT t.id, t.fecha, t.hora_carga, t.hora_inicio_atencion, t.hora_cierre_atencion,
               t.duracion_minutos, t.tipo_service, t.estado, t.es_compensacion,
-              c.nombre AS cliente, c.cuit, c.telefono, c.condicion_iva,
+              c.nombre AS cliente, c.telefono,
               v.marca, v.modelo, v.version,
               vc.nro_serie, vc.km,
               u.nombre AS asesor,

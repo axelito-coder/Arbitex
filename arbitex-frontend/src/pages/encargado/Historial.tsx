@@ -61,8 +61,8 @@ function Historial() {
   }
 const asesores = [...new Set(turnos.map(t => t.asesor).filter(Boolean))]
   const turnosFiltrados = turnos.filter((t) => {
-    if (filtroAsesor !== 'Todos' && t.asesor !== filtroAsesor) return false
-    if (filtroEstado !== 'Todos' && t.estado !== filtroEstado) return false
+    if (filtroAsesor && t.asesor !== filtroAsesor) return false
+    if (filtroEstado && t.estado !== filtroEstado) return false
     
     return true
   })
@@ -97,7 +97,7 @@ const asesores = [...new Set(turnos.map(t => t.asesor).filter(Boolean))]
         </div>
 
 
-        <button className="filtro-limpiar" onClick={() => { setFiltroAsesor('Todos'); setFiltroEstado('Todos'); }}>
+        <button className="filtro-limpiar" onClick={() => { setFiltroAsesor(''); setFiltroEstado(''); }}>
           Limpiar filtros
         </button>
 

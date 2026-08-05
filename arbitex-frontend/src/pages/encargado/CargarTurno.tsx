@@ -14,11 +14,8 @@ const tipoDeService =[
 function CargarTurno(){
   const [form, setForm] = useState({
     nombre_cliente: '',
-    marca: '',
-    modelo: '',
-    version: '',
-    nro_serie: '',
-    km: '',
+    email: '',
+    telefono: '',
     tipoService: ''
   })
   const [errores, setErrores] = useState({
@@ -64,11 +61,8 @@ function CargarTurno(){
         },
         body: JSON.stringify({
           nombre_cliente: form.nombre_cliente,
-          marca:          form.marca || null,
-          modelo:         form.modelo || null,
-          version:        form.version || null,
-          nro_serie:      form.nro_serie || null,
-          km:             form.km ? parseInt(form.km) : null,
+          email: form.email || null,
+          telefono: form.telefono,
           tipo_service:   form.tipoService,
         })
        })
@@ -80,7 +74,7 @@ function CargarTurno(){
         return
        }
       setEnviado(true)
-      setForm({ nombre_cliente: '', marca: '', modelo: '', version: '', nro_serie: '', km: '', tipoService: ''})
+      setForm({ nombre_cliente: '', email: '', telefono: '', tipoService: ''})
       setErrores({ nombre_cliente: '', tipoService: '' })
     }catch{
       setError('Error al conectar con el servidor')
@@ -106,33 +100,15 @@ function CargarTurno(){
       </div>
 
       <div className="cargar-campo">
-        <label className="cargar-label">Marca</label>
-        <input className="cargar-input" type="text" name="marca"
-          value={form.marca} onChange={handleChange} placeholder="Toyota"/>
+        <label className="cargar-label">Email <span className="cargar-opcional">(Opcional)</span></label>
+        <input className="cargar-input" type="email" name="email"
+        value={form.email} onChange={handleChange} placeholder="cliente@email.com"/>
       </div>
 
       <div className="cargar-campo">
-        <label className="cargar-label">Modelo</label>
-        <input className="cargar-input" type="text" name="modelo"
-          value={form.modelo} onChange={handleChange} placeholder="Corolla"/>
-      </div>
-
-      <div className="cargar-campo">
-        <label className="cargar-label">Versión <span className="cargar-opcional">(opcional)</span></label>
-        <input className="cargar-input" type="text" name="version"
-          value={form.version} onChange={handleChange} placeholder="1.8 eCVT"/>
-      </div>
-
-      <div className="cargar-campo">
-        <label className="cargar-label">Nro. de serie <span className="cargar-opcional">(opcional)</span></label>
-        <input className="cargar-input" type="text" name="nro_serie"
-          value={form.nro_serie} onChange={handleChange} placeholder="ABC123456"/>
-      </div>
-
-      <div className="cargar-campo">
-        <label className="cargar-label">Kilometraje <span className="cargar-opcional">(opcional)</span></label>
-        <input className="cargar-input" type="number" name="km"
-          value={form.km} onChange={handleChange} placeholder="45000"/>
+        <label className="cargar-label">Teléfono <span className="cargar-opcional">(Opcional)</span></label>
+        <input className="cargar-input" type="text" name="telefono"
+        value={form.telefono} onChange={handleChange} placeholder="011-1234-5678"/>
       </div>
 
       <div className="cargar-campo">
