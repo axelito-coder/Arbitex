@@ -170,6 +170,9 @@ async function aplicarAcumuladoFicticio(): Promise<void> {
     if(promedio === 0) return
 
     //sumar el promedio como ficticio a los que faltaron
+    //esto se usa para equilibrar el sistema de asignacion, sin sumarle comision alguna a los asesores que faltan y evitando que se ocupen todos los turnos al dia siguiente
+    //el acumulado semanal mientras tanto es con el que los aseores facturan su comision y es verdaderamente lo que le dan a la empresa
+    //acumulado distribucion es para evitar irregularidades que beneficien injustamente a los que faltan algunos días y afecten el rendimiento de los mejores asesores
     for (const asesor of ausentes.rows){
         await pool.query(`
             UPDATE empleados
@@ -284,6 +287,7 @@ export async function cargarTurno(req: RequestConUsuario, res: Response) {
     const turnosHoy = await contarTurnosHoy()
     const cantidadAsesores = await contarAsesores()
 
+    //cuando empieza el día
     if(turnosHoy === 0){
         await cerrarTurnosPendientes()
         await aplicarAcumuladoFicticio()
