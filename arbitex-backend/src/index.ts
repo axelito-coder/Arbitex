@@ -28,7 +28,11 @@ app.post('/admin/resetear-semana', async (req, res) => {
     await pool.query(`
       UPDATE empleados
       SET acumulado_semana_anterior = acumulado_semanal,
-          acumulado_semanal = 0
+          acumulado_semanal = 0,
+          acumulado_distribucion = 0,
+          dias_trabajados_semana = 0,
+          bonus_disponible = false,
+          bonus_maximo = 0
     `)
 
     const result = await pool.query(`
@@ -45,7 +49,19 @@ app.post('/admin/resetear-semana', async (req, res) => {
 
     // Actualizar config
     const fecha = new Date()
-    const semana = Math.ceil((fecha.getDate() - fecha.getDay()) / 7)
+    const lunes = new Date(fecha)
+    const dia = fecha.getDay()
+    const diff = dia === 0 ? -6 : 1 -dia //Si es domingo resta 6, sino resta lo que falta para lunes
+    lunes.setDate(fecha.getDate() + diff)
+    lunes.setHours(0, 0, 0, 0)
+
+    //Número de semana basado en el lunes
+    const jueves = new Date(lunes)
+    jueves.setDate(lunes.getDate() + 3)
+    const inicioAnio = new Date(jueves.getFullYear(), 0, 1)
+    const diff2 = jueves.getTime() - inicioAnio.getTime()
+    const semana =  Math.ceil((diff2 / 86400000 + inicioAnio.getDay() + 1) / 7)
+
     await pool.query(
       'UPDATE config SET semana_activa = $1, año_activo = $2 WHERE id = 1',
       [semana, fecha.getFullYear()]

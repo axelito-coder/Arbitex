@@ -58,7 +58,11 @@ async function  aplicarCompensacionSemanal(): Promise<void> {
     await pool.query(`
         UPDATE empleados
         SET acumulado_semana_anterior = acumulado_semanal,
-        acumulado_semanal = 0
+            acumulado_semanal = 0,
+            acumulado_distribucion = 0,
+            dias_trabajados_semana = 0,
+            bonus_disponible = false,
+            bonus_maximo = 0
     `)
 
     const result = await pool.query(`
@@ -139,6 +143,48 @@ async function cerrarTurnosPendientes(): Promise<void> {
     console.log('Turnos en proceso anteriores cerrados')
 }
 
+async function aplicarAcumuladoFicticio(): Promise<void> {
+    //obtener asesores que no trabajaron ayer
+    const ausentes = await pool.query(`
+        SELECT id, acumulado_distribucion FROM empleados
+        WHERE ultimo_dia_trabajado < CURRENT_DATE - 1
+        OR ultimo_dia_trabajado IS NULL
+    `)
+    if(ausentes.rows.length === 0) return
+    //calcular promedio del equipo ayer
+    const promedioResult = await pool.query(`
+        SELECT COALESCE(AVG(total_dia), 0) AS promedio
+        FROM (
+           SELECT e.id, COALESCE(SUM(f.total), 0) AS total_dia
+           FROM empleados e
+           JOIN turnos t ON t.id_asesor = e.id
+           JOIN facturas f ON f.id_turno = t.id
+           WHERE e.ultimo_dia_trabajado = CURRENT_DATE - 1
+           AND t.fecha = CURRENT_DATE - 1
+           GROUP BY e.id
+        ) AS totales_dia
+    `)
+
+    const promedio = parseFloat(promedioResult.rows[0].promedio)
+
+    if(promedio === 0) return
+
+    //sumar el promedio como ficticio a los que faltaron
+    for (const asesor of ausentes.rows){
+        await pool.query(`
+            UPDATE empleados
+            SET acumulado_distribucion = acumulado_distribucion + $1
+            WHERE id = $2
+        `, [promedio, asesor.id])
+    }
+
+    //hacemos lo de acumulado fictio para que la diferencia de montos al siguiente dia no sea tan grande
+    //y la gente que si trabajo el dia anterior no pierda todos los turnos del dia siguiente
+    //junto con los beneficios disponibles que puede dar el encargado, se resuelve este problema
+    console.log(`Acumulado ficticio aplicado $${promedio} a ${ausentes.rows.length}`)
+
+}
+
 async function asignarTurno(idTurno: number): Promise<void> { //funcion principal para asignar turnos
     const asesores = await pool.query(` 
         SELECT id FROM empleados WHERE sesion_activa = true
@@ -162,8 +208,8 @@ async function asignarTurno(idTurno: number): Promise<void> { //funcion principa
         FROM empleados e
         LEFT JOIN turnos t ON t.id_asesor = e.id AND t.fecha = CURRENT_DATE
         WHERE e.id = ANY($1)
-        GROUP BY e.id, e.acumulado_semanal, e.orden_compensacion
-        ORDER BY e.acumulado_semanal ASC,
+        GROUP BY e.id, e.acumulado_distribucion, e.orden_compensacion
+        ORDER BY e.acumulado_distribucion ASC,
                 COUNT(t.id) ASC,
                 e.orden_compensacion ASC
         LIMIT 1
@@ -180,6 +226,12 @@ async function asignarTurno(idTurno: number): Promise<void> { //funcion principa
     await pool.query(`
         UPDATE empleados e
         SET acumulado_semanal = acumulado_semanal + (
+          SELECT COALESCE(SUM(f.total), 0)
+          FROM facturas f
+          JOIN turnos t ON t.id = f.id_turno
+          WHERE t.id = $1
+        ),
+        acumulado_distribucion = acumulado_distribucion + (
           SELECT COALESCE(SUM(f.total), 0)
           FROM facturas f
           JOIN turnos t ON t.id = f.id_turno
@@ -234,6 +286,7 @@ export async function cargarTurno(req: RequestConUsuario, res: Response) {
 
     if(turnosHoy === 0){
         await cerrarTurnosPendientes()
+        await aplicarAcumuladoFicticio()
     }
     console.log('esNuevaSemana:', esNuevaSemana)
     console.log('turnosHoy:', turnosHoy) 

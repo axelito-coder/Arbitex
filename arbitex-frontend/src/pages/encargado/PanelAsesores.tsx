@@ -5,6 +5,7 @@ import '../../styles/PanelAsesores.css'
 type Asesor = {
   nombre: string
   acumulado_semanal: number
+  acumulado_distribucion: number,
   sesion_activa: boolean
   tiempo_promedio: number
   orden_compensacion: number
@@ -45,7 +46,8 @@ function PanelAsesores() {
   const promedioEquipo = 20
   const datosGrafico = asesores.map(a => ({
     nombre: a.nombre,
-    acumulado: a.acumulado_semanal
+    acumulado: Number(a.acumulado_semanal),
+    distribucion: Number(a.acumulado_distribucion)
   }))
   
   return (
@@ -102,16 +104,34 @@ function PanelAsesores() {
 
       {/* GRÁFICO COMPARATIVO */}
       <div className='panel-grafico'>
+         <div style={{display: 'flex', gap: 16, marginBottom: 12, fontSize: 12, color: '#595959'}}>
+              <div style={{display: 'flex', alignItems: 'center', gap: 6}}>
+                <div style={{width: 12, height: 12, borderRadius: 2, background: '#EB0A1E'}}></div>
+                <span>Facturado real</span>
+              </div>
+              <div style={{display: 'flex', alignItems: 'center', gap: 6}}>
+                <div style={{width: 12, height: 12, borderRadius: 2, background: '#E0E0E0'}}></div>
+                <span>Posicion de distribucion (incluye ajuste por ausencia)</span>
+              </div>
+            </div>
         <p className='seccion-titulo'>Acumulado semanal por asesor</p>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={datosGrafico}>
             <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false}/>
             <XAxis dataKey="nombre" tick={{ fontSize: 13, fill: '#595959'}} axisLine={false} tickLine={false}/>
             <YAxis hide/>
-            <Tooltip formatter={(value) => typeof value === 'number' ? [`$${value.toLocaleString('es-AR')}, 'Acumulado`] : [value, '']}/>
-            <Bar dataKey="acumulado" radius={[4, 4, 0, 0]}>
+            <Tooltip formatter={(value, name) => {
+                          const num = Number(value) 
+                          return [`$${isNaN(num) ? '-' : num.toLocaleString('es-AR')}`, String(name)]}
+            }/>
+            <Bar dataKey="acumulado" name="Facturado real" radius={[4, 4, 0, 0]}>
               {datosGrafico.map((_, i) => (
                 <Cell key={i} fill="#EB0A1E"/>
+              ))}
+            </Bar>
+            <Bar dataKey="distribucion" name="acumulado distribucion" radius={[4, 4, 0, 0]}>
+              {datosGrafico.map((_, i) => (
+                <Cell key={i} fill="#E0E0E0"/>
               ))}
             </Bar>
           </BarChart>

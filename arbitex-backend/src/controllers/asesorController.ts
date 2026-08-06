@@ -214,7 +214,8 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
 
         await pool.query(`
          UPDATE empleados
-         SET acumulado_semanal = acumulado_semanal + $1
+         SET acumulado_semanal = acumulado_semanal + $1,
+             acumulado_distribucion = acumulado_distribucion + $1
          WHERE id_usuario = $2
         `, [total, req.usuario?.id])
 
@@ -229,6 +230,17 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
               AND duracion_minutos IS NOT NULL
               AND fecha >= DATE_TRUNC('week', CURRENT_DATE)
             )
+            WHERE id_usuario = $1
+        `, [req.usuario?.id])
+
+        //actualizar el ultimo dia trabajado y dias trabajados semana
+        await pool.query(`
+            UPDATE empleados
+            SET ultimo_dia_trabajado = CURRENT_DATE,
+                dias_trabajados_semana = CASE
+                 WHEN ultimo_dia_trabajado = CURRENT_DATE THEN dias_trabajados_semana
+                 ELSE dias_trabajados_semana + 1
+                END
             WHERE id_usuario = $1
         `, [req.usuario?.id])
 

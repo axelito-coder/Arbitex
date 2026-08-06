@@ -32,7 +32,8 @@ export async function login(req: Request, res: Response){
         // Si es asesor, activar sesion_activa
        if (usuario.rol === 'asesor') {
          await pool.query(`
-         UPDATE empleados SET sesion_activa = true
+         UPDATE empleados
+         SET sesion_activa = true
          WHERE id_usuario = $1
         `, [usuario.id])
 }

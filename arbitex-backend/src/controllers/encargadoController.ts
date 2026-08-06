@@ -77,7 +77,7 @@ export async function getTurnosHoy(req: RequestConUsuario, res: Response) {
 export async function  getPanelAsesores(req: RequestConUsuario, res: Response) {
     try{
         const result = await pool.query(`
-            SELECT u.id AS id_usuario, u.nombre, u.email, e.acumulado_semanal, e.sesion_activa,
+            SELECT u.id AS id_usuario, u.nombre, u.email, e.acumulado_semanal, e.acumulado_distribucion, e.sesion_activa,
             e.tiempo_promedio, e.orden_compensacion,
             (e.acumulado_semanal * 0.01) AS comision,
             COUNT(t.id) FILTER (WHERE t.fecha = CURRENT_DATE) AS turnos_hoy,
@@ -85,7 +85,7 @@ export async function  getPanelAsesores(req: RequestConUsuario, res: Response) {
             FROM empleados e
             JOIN usuarios u ON u.id = e.id_usuario
             LEFT JOIN turnos t ON t.id_asesor = e.id
-            GROUP BY u.id, u.nombre, u.email, e.acumulado_semanal, e.sesion_activa,
+            GROUP BY u.id, u.nombre, u.email, e.acumulado_semanal, e.acumulado_distribucion, e.sesion_activa,
                      e.tiempo_promedio, e.orden_compensacion
             ORDER BY e.acumulado_semanal ASC    
         `)
