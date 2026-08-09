@@ -10,7 +10,7 @@ function getNumeroSemana(fecha: Date): number { //Obtenemos el numero de la sema
     lunes.setDate(fecha.getDate() + diff)
     lunes.setHours(0, 0, 0, 0)
 
-    //Número de semana basado en el lunes
+    //Número de semana basado en el lunes y tambien el primer jueves del año
     const jueves = new Date(lunes)
     jueves.setDate(lunes.getDate() + 3)
     const inicioAnio = new Date(jueves.getFullYear(), 0, 1)
@@ -62,7 +62,8 @@ async function  aplicarCompensacionSemanal(): Promise<void> {
             acumulado_distribucion = 0,
             dias_trabajados_semana = 0,
             bonus_disponible = false,
-            bonus_maximo = 0
+            bonus_maximo = 0,
+            bonus_semana = 0
     `)
 
     const result = await pool.query(`
@@ -76,6 +77,19 @@ async function  aplicarCompensacionSemanal(): Promise<void> {
             [i + 1, result.rows[i].id]
         )
     }
+
+    const totalSemanaResult = await pool.query(`
+        SELECT COALESCE(SUM(acumulado_semana_anterior), 0) AS total FROM empleados
+    `)
+    const totalSemana = parseFloat(totalSemanaResult.rows[0].total)
+    const presupuesoBonus = totalSemana * 0.005
+    await pool.query(`
+        UPDATE config
+        SET presupuesto_bonus = $1,
+            presupuesto_usado = 0
+        WHERE id = 1
+    `, [presupuesoBonus])
+
 }
 
 async function contarTurnosHoy(): Promise<number> { //para verificar que no sea una semana nueva se verifica que no haya turnos del mismo dia
@@ -153,7 +167,7 @@ async function aplicarAcumuladoFicticio(): Promise<void> {
     if(ausentes.rows.length === 0) return
     //calcular promedio del equipo ayer
     const promedioResult = await pool.query(`
-        SELECT COALESCE(AVG(total_dia), 0) AS promedio
+        SELECT COALESCE(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_dia), 0) AS promedio
         FROM (
            SELECT e.id, COALESCE(SUM(f.total), 0) AS total_dia
            FROM empleados e

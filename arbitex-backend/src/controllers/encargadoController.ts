@@ -78,7 +78,7 @@ export async function  getPanelAsesores(req: RequestConUsuario, res: Response) {
     try{
         const result = await pool.query(`
             SELECT u.id AS id_usuario, u.nombre, u.email, e.acumulado_semanal, e.acumulado_distribucion, e.sesion_activa,
-            e.tiempo_promedio, e.orden_compensacion,
+            e.tiempo_promedio, e.orden_compensacion, e.dias_trabajados_semana,
             (e.acumulado_semanal * 0.01) AS comision,
             COUNT(t.id) FILTER (WHERE t.fecha = CURRENT_DATE) AS turnos_hoy,
             COUNT(t.id) FILTER (WHERE t.fecha = CURRENT_DATE AND t.estado = 'en_proceso') AS en_proceso
@@ -86,7 +86,7 @@ export async function  getPanelAsesores(req: RequestConUsuario, res: Response) {
             JOIN usuarios u ON u.id = e.id_usuario
             LEFT JOIN turnos t ON t.id_asesor = e.id
             GROUP BY u.id, u.nombre, u.email, e.acumulado_semanal, e.acumulado_distribucion, e.sesion_activa,
-                     e.tiempo_promedio, e.orden_compensacion
+                     e.tiempo_promedio, e.orden_compensacion, e.dias_trabajados_semana
             ORDER BY e.acumulado_semanal ASC    
         `)
 
@@ -268,5 +268,55 @@ export async function  desactivarAsesor(req: RequestConUsuario, res: Response) {
   }catch(err){
     console.error(err)
     return res.status(500).json({ mensaje: 'Error interno del servidor' })
+  }
+}
+
+export async function darBonus(req: RequestConUsuario, res: Response) {
+  const { id } = req.params
+  const { monto } = req.body
+  if(!monto || monto <= 0){
+    return res.status(400).json({ mensaje: 'El monto debe ser mayor a 0'})
+  }
+  try{
+    //Verificar presupuesto disponible
+    const configResult = await pool.query(`
+      SELECT presupuesto_bonus, presupuesto_usado FROM config WHERE id = 1
+    `)
+    const config = configResult.rows[0]
+    const disponible = parseFloat(config.presupuesto_bonus) - parseFloat(config.presupuesto_usado)
+    if(monto > disponible){
+      return res.status(400).json({
+        mensaje: `Presupuesto insuficiente. Disponible: $${disponible.toLocaleString('es-AR')}`
+      })
+    }
+    //Verificar bonus máximo del asesor
+    const asesorResult = await pool.query(`
+      SELECT bonus_maximo, bonus_disponible FROM empleados WHERE id_usuario = $1
+    `, [id])
+
+    const asesor = asesorResult.rows[0]
+
+    if(monto > parseFloat(asesor.bonus_maximo)){
+      return res.status(400).json({
+        mensaje: `El monto supera el limite del asesor. Máximo: $${parseFloat(asesor.bonus_maximo).toLocaleString('es-AR')}`
+      })
+    }
+
+    //aplicar bonus
+    await pool.query(`
+      UPDATE empleados
+      SET bonus_semana = bonus_semana + $1
+      WHERE id_usuario = $2
+    `, [monto, id])
+
+    //actualizar presupuesto semanal
+    await pool.query(`
+      UPDATE config SET presupuesto_usado = presupuesto_usado + $1 WHERE id = 1
+    `, [monto])
+
+    return res.json({mensaje: 'Bonus aplicado correctamente'})
+  }catch(err){
+    console.error(err)
+    return res.status(500).json({ mensaje: 'Error intero del servidor'})
   }
 }
