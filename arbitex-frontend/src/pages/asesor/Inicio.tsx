@@ -82,7 +82,7 @@ function Inicio(){
             <div className="turno-actual-datos">
               <div>
                 <p className="turno-actual-cliente">{turnoActual.cliente}</p>
-                <p className="turno-actual-detalle">{turnoActual.vehiculo} * {turnoActual.tipo_service}</p>
+                <p className="turno-actual-detalle">{turnoActual.tipo_service}</p>
               </div>
             </div>
         

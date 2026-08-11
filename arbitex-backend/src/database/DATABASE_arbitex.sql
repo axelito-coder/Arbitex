@@ -2,12 +2,12 @@
 -- PostgreSQL database dump
 --
 
-\restrict rmV1X7uFPRJJWnGePjWw39AMbm5Nu1nGg7iWBY3QFaxMBKOpE0ex8wE0pkSoZw4
+\restrict m8XELuuC8pG5gJeBggHfHggHdSYZ2jPuwi1XE8pvM2hZFkmvIPYsOdTAy07od2t
 
 -- Dumped from database version 18.3
 -- Dumped by pg_dump version 18.3
 
--- Started on 2026-08-02 21:33:42
+-- Started on 2026-08-10 23:31:09
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -57,51 +57,12 @@ CREATE SEQUENCE public.clientes_id_seq
 ALTER SEQUENCE public.clientes_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5108 (class 0 OID 0)
+-- TOC entry 5104 (class 0 OID 0)
 -- Dependencies: 225
 -- Name: clientes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.clientes_id_seq OWNED BY public.clientes.id;
-
-
---
--- TOC entry 238 (class 1259 OID 16565)
--- Name: comisiones; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.comisiones (
-    id integer NOT NULL,
-    id_factura integer,
-    monto numeric(12,2)
-);
-
-
-ALTER TABLE public.comisiones OWNER TO postgres;
-
---
--- TOC entry 237 (class 1259 OID 16564)
--- Name: comisiones_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.comisiones_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.comisiones_id_seq OWNER TO postgres;
-
---
--- TOC entry 5109 (class 0 OID 0)
--- Dependencies: 237
--- Name: comisiones_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.comisiones_id_seq OWNED BY public.comisiones.id;
 
 
 --
@@ -112,7 +73,9 @@ ALTER SEQUENCE public.comisiones_id_seq OWNED BY public.comisiones.id;
 CREATE TABLE public.config (
     id integer NOT NULL,
     semana_activa integer NOT NULL,
-    "año_activo" integer NOT NULL
+    "año_activo" integer NOT NULL,
+    presupuesto_bonus numeric(12,2) DEFAULT 0,
+    presupuesto_usado numeric(12,2) DEFAULT 0
 );
 
 
@@ -135,7 +98,7 @@ CREATE SEQUENCE public.config_id_seq
 ALTER SEQUENCE public.config_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5110 (class 0 OID 0)
+-- TOC entry 5105 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: config_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -155,7 +118,13 @@ CREATE TABLE public.empleados (
     acumulado_semana_anterior numeric(12,2) DEFAULT 0,
     orden_compensacion integer,
     tiempo_promedio integer DEFAULT 20,
-    sesion_activa boolean DEFAULT false
+    sesion_activa boolean DEFAULT false,
+    ultimo_dia_trabajado date,
+    dias_trabajados_semana integer DEFAULT 0,
+    acumulado_distribucion numeric(12,2) DEFAULT 0,
+    bonus_disponible boolean DEFAULT false,
+    bonus_maximo numeric(12,2) DEFAULT 0,
+    bonus_semana numeric(12,2) DEFAULT 0
 );
 
 
@@ -178,7 +147,7 @@ CREATE SEQUENCE public.empleados_id_seq
 ALTER SEQUENCE public.empleados_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5111 (class 0 OID 0)
+-- TOC entry 5106 (class 0 OID 0)
 -- Dependencies: 223
 -- Name: empleados_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -219,7 +188,7 @@ CREATE SEQUENCE public.facturas_id_seq
 ALTER SEQUENCE public.facturas_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5112 (class 0 OID 0)
+-- TOC entry 5107 (class 0 OID 0)
 -- Dependencies: 235
 -- Name: facturas_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -261,7 +230,7 @@ CREATE SEQUENCE public.items_turno_id_seq
 ALTER SEQUENCE public.items_turno_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5113 (class 0 OID 0)
+-- TOC entry 5108 (class 0 OID 0)
 -- Dependencies: 233
 -- Name: items_turno_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -309,7 +278,7 @@ CREATE SEQUENCE public.turnos_id_seq
 ALTER SEQUENCE public.turnos_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5114 (class 0 OID 0)
+-- TOC entry 5109 (class 0 OID 0)
 -- Dependencies: 231
 -- Name: turnos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -350,7 +319,7 @@ CREATE SEQUENCE public.usuarios_id_seq
 ALTER SEQUENCE public.usuarios_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5115 (class 0 OID 0)
+-- TOC entry 5110 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: usuarios_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -392,7 +361,7 @@ CREATE SEQUENCE public.vehiculo_cliente_id_seq
 ALTER SEQUENCE public.vehiculo_cliente_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5116 (class 0 OID 0)
+-- TOC entry 5111 (class 0 OID 0)
 -- Dependencies: 229
 -- Name: vehiculo_cliente_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -432,7 +401,7 @@ CREATE SEQUENCE public.vehiculos_id_seq
 ALTER SEQUENCE public.vehiculos_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5117 (class 0 OID 0)
+-- TOC entry 5112 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: vehiculos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -441,7 +410,7 @@ ALTER SEQUENCE public.vehiculos_id_seq OWNED BY public.vehiculos.id;
 
 
 --
--- TOC entry 4908 (class 2604 OID 16476)
+-- TOC entry 4910 (class 2604 OID 16476)
 -- Name: clientes id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -449,15 +418,7 @@ ALTER TABLE ONLY public.clientes ALTER COLUMN id SET DEFAULT nextval('public.cli
 
 
 --
--- TOC entry 4917 (class 2604 OID 16568)
--- Name: comisiones id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.comisiones ALTER COLUMN id SET DEFAULT nextval('public.comisiones_id_seq'::regclass);
-
-
---
--- TOC entry 4901 (class 2604 OID 16433)
+-- TOC entry 4896 (class 2604 OID 16433)
 -- Name: config id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -465,7 +426,7 @@ ALTER TABLE ONLY public.config ALTER COLUMN id SET DEFAULT nextval('public.confi
 
 
 --
--- TOC entry 4903 (class 2604 OID 16457)
+-- TOC entry 4900 (class 2604 OID 16457)
 -- Name: empleados id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -473,7 +434,7 @@ ALTER TABLE ONLY public.empleados ALTER COLUMN id SET DEFAULT nextval('public.em
 
 
 --
--- TOC entry 4916 (class 2604 OID 16550)
+-- TOC entry 4918 (class 2604 OID 16550)
 -- Name: facturas id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -481,7 +442,7 @@ ALTER TABLE ONLY public.facturas ALTER COLUMN id SET DEFAULT nextval('public.fac
 
 
 --
--- TOC entry 4915 (class 2604 OID 16534)
+-- TOC entry 4917 (class 2604 OID 16534)
 -- Name: items_turno id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -489,7 +450,7 @@ ALTER TABLE ONLY public.items_turno ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
--- TOC entry 4911 (class 2604 OID 16513)
+-- TOC entry 4913 (class 2604 OID 16513)
 -- Name: turnos id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -497,7 +458,7 @@ ALTER TABLE ONLY public.turnos ALTER COLUMN id SET DEFAULT nextval('public.turno
 
 
 --
--- TOC entry 4902 (class 2604 OID 16443)
+-- TOC entry 4899 (class 2604 OID 16443)
 -- Name: usuarios id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -505,7 +466,7 @@ ALTER TABLE ONLY public.usuarios ALTER COLUMN id SET DEFAULT nextval('public.usu
 
 
 --
--- TOC entry 4910 (class 2604 OID 16495)
+-- TOC entry 4912 (class 2604 OID 16495)
 -- Name: vehiculo_cliente id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -513,7 +474,7 @@ ALTER TABLE ONLY public.vehiculo_cliente ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 4909 (class 2604 OID 16485)
+-- TOC entry 4911 (class 2604 OID 16485)
 -- Name: vehiculos id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -521,7 +482,7 @@ ALTER TABLE ONLY public.vehiculos ALTER COLUMN id SET DEFAULT nextval('public.ve
 
 
 --
--- TOC entry 4929 (class 2606 OID 16480)
+-- TOC entry 4930 (class 2606 OID 16480)
 -- Name: clientes clientes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -530,25 +491,7 @@ ALTER TABLE ONLY public.clientes
 
 
 --
--- TOC entry 4945 (class 2606 OID 16573)
--- Name: comisiones comisiones_id_factura_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.comisiones
-    ADD CONSTRAINT comisiones_id_factura_key UNIQUE (id_factura);
-
-
---
--- TOC entry 4947 (class 2606 OID 16571)
--- Name: comisiones comisiones_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.comisiones
-    ADD CONSTRAINT comisiones_pkey PRIMARY KEY (id);
-
-
---
--- TOC entry 4919 (class 2606 OID 16438)
+-- TOC entry 4920 (class 2606 OID 16438)
 -- Name: config config_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -557,7 +500,7 @@ ALTER TABLE ONLY public.config
 
 
 --
--- TOC entry 4925 (class 2606 OID 16466)
+-- TOC entry 4926 (class 2606 OID 16466)
 -- Name: empleados empleados_id_usuario_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -566,7 +509,7 @@ ALTER TABLE ONLY public.empleados
 
 
 --
--- TOC entry 4927 (class 2606 OID 16464)
+-- TOC entry 4928 (class 2606 OID 16464)
 -- Name: empleados empleados_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -575,7 +518,7 @@ ALTER TABLE ONLY public.empleados
 
 
 --
--- TOC entry 4939 (class 2606 OID 16558)
+-- TOC entry 4940 (class 2606 OID 16558)
 -- Name: facturas facturas_id_turno_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -584,7 +527,7 @@ ALTER TABLE ONLY public.facturas
 
 
 --
--- TOC entry 4941 (class 2606 OID 16556)
+-- TOC entry 4942 (class 2606 OID 16556)
 -- Name: facturas facturas_nro_factura_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -593,7 +536,7 @@ ALTER TABLE ONLY public.facturas
 
 
 --
--- TOC entry 4943 (class 2606 OID 16554)
+-- TOC entry 4944 (class 2606 OID 16554)
 -- Name: facturas facturas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -602,7 +545,7 @@ ALTER TABLE ONLY public.facturas
 
 
 --
--- TOC entry 4937 (class 2606 OID 16540)
+-- TOC entry 4938 (class 2606 OID 16540)
 -- Name: items_turno items_turno_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -611,7 +554,7 @@ ALTER TABLE ONLY public.items_turno
 
 
 --
--- TOC entry 4935 (class 2606 OID 16519)
+-- TOC entry 4936 (class 2606 OID 16519)
 -- Name: turnos turnos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -620,7 +563,7 @@ ALTER TABLE ONLY public.turnos
 
 
 --
--- TOC entry 4921 (class 2606 OID 16452)
+-- TOC entry 4922 (class 2606 OID 16452)
 -- Name: usuarios usuarios_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -629,7 +572,7 @@ ALTER TABLE ONLY public.usuarios
 
 
 --
--- TOC entry 4923 (class 2606 OID 16450)
+-- TOC entry 4924 (class 2606 OID 16450)
 -- Name: usuarios usuarios_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -638,7 +581,7 @@ ALTER TABLE ONLY public.usuarios
 
 
 --
--- TOC entry 4933 (class 2606 OID 16498)
+-- TOC entry 4934 (class 2606 OID 16498)
 -- Name: vehiculo_cliente vehiculo_cliente_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -647,7 +590,7 @@ ALTER TABLE ONLY public.vehiculo_cliente
 
 
 --
--- TOC entry 4931 (class 2606 OID 16490)
+-- TOC entry 4932 (class 2606 OID 16490)
 -- Name: vehiculos vehiculos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -656,16 +599,7 @@ ALTER TABLE ONLY public.vehiculos
 
 
 --
--- TOC entry 4955 (class 2606 OID 16574)
--- Name: comisiones comisiones_id_factura_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.comisiones
-    ADD CONSTRAINT comisiones_id_factura_fkey FOREIGN KEY (id_factura) REFERENCES public.facturas(id);
-
-
---
--- TOC entry 4948 (class 2606 OID 16467)
+-- TOC entry 4945 (class 2606 OID 16467)
 -- Name: empleados empleados_id_usuario_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -674,7 +608,7 @@ ALTER TABLE ONLY public.empleados
 
 
 --
--- TOC entry 4954 (class 2606 OID 16559)
+-- TOC entry 4951 (class 2606 OID 16559)
 -- Name: facturas facturas_id_turno_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -683,7 +617,7 @@ ALTER TABLE ONLY public.facturas
 
 
 --
--- TOC entry 4953 (class 2606 OID 16541)
+-- TOC entry 4950 (class 2606 OID 16541)
 -- Name: items_turno items_turno_id_turno_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -692,7 +626,7 @@ ALTER TABLE ONLY public.items_turno
 
 
 --
--- TOC entry 4951 (class 2606 OID 16525)
+-- TOC entry 4948 (class 2606 OID 16525)
 -- Name: turnos turnos_id_asesor_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -701,7 +635,7 @@ ALTER TABLE ONLY public.turnos
 
 
 --
--- TOC entry 4952 (class 2606 OID 16520)
+-- TOC entry 4949 (class 2606 OID 16520)
 -- Name: turnos turnos_id_vehiculo_cliente_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -710,7 +644,7 @@ ALTER TABLE ONLY public.turnos
 
 
 --
--- TOC entry 4949 (class 2606 OID 16504)
+-- TOC entry 4946 (class 2606 OID 16504)
 -- Name: vehiculo_cliente vehiculo_cliente_id_cliente_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -719,7 +653,7 @@ ALTER TABLE ONLY public.vehiculo_cliente
 
 
 --
--- TOC entry 4950 (class 2606 OID 16499)
+-- TOC entry 4947 (class 2606 OID 16499)
 -- Name: vehiculo_cliente vehiculo_cliente_id_vehiculo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -727,11 +661,11 @@ ALTER TABLE ONLY public.vehiculo_cliente
     ADD CONSTRAINT vehiculo_cliente_id_vehiculo_fkey FOREIGN KEY (id_vehiculo) REFERENCES public.vehiculos(id);
 
 
--- Completed on 2026-08-02 21:33:43
+-- Completed on 2026-08-10 23:31:09
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict rmV1X7uFPRJJWnGePjWw39AMbm5Nu1nGg7iWBY3QFaxMBKOpE0ex8wE0pkSoZw4
+\unrestrict m8XELuuC8pG5gJeBggHfHggHdSYZ2jPuwi1XE8pvM2hZFkmvIPYsOdTAy07od2t
 

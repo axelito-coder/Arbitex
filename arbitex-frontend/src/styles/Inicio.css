@@ -159,6 +159,21 @@
 .badge-naranja { background: #FEF3C7; color: #92400E; }
 .badge-gris    { background: #E0E0E0; color: #595959; }
 
+.btn-finalizar {
+  flex: 2;
+  padding: 12px;
+  background: #EB0A1E;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+.btn-finalizar:hover{
+  background: #eb2b3b;
+}
+
 @media (max-width: 480px) {
   .turno-actual-datos { flex-direction: column; }
   .turno-actual-extra { text-align: left; }

@@ -14,8 +14,7 @@ export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
               v.marca, v.modelo, v.version,
               vc.nro_serie, vc.km,
               u.nombre AS asesor,
-              f.nro_factura, f.total,
-              co.monto AS comision
+              f.nro_factura, f.total
             FROM turnos t
             JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
             JOIN clientes c ON c.id = vc.id_cliente
@@ -23,7 +22,6 @@ export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
             LEFT JOIN empleados e ON e.id = t.id_asesor
             LEFT JOIN usuarios u ON u.id = e.id_usuario
             LEFT JOIN facturas f ON f.id_turno = t.id
-            LEFT JOIN comisiones co ON co.id_factura = f.id
             WHERE t.id = $1
         `, [id])
         if(turnoResult.rows.length === 0){
@@ -80,13 +78,14 @@ export async function  getPanelAsesores(req: RequestConUsuario, res: Response) {
             SELECT u.id AS id_usuario, u.nombre, u.email, e.acumulado_semanal, e.acumulado_distribucion, e.sesion_activa,
             e.tiempo_promedio, e.orden_compensacion, e.dias_trabajados_semana,
             (e.acumulado_semanal * 0.01) AS comision,
+            e.bonus_semana,
             COUNT(t.id) FILTER (WHERE t.fecha = CURRENT_DATE) AS turnos_hoy,
             COUNT(t.id) FILTER (WHERE t.fecha = CURRENT_DATE AND t.estado = 'en_proceso') AS en_proceso
             FROM empleados e
             JOIN usuarios u ON u.id = e.id_usuario
             LEFT JOIN turnos t ON t.id_asesor = e.id
             GROUP BY u.id, u.nombre, u.email, e.acumulado_semanal, e.acumulado_distribucion, e.sesion_activa,
-                     e.tiempo_promedio, e.orden_compensacion, e.dias_trabajados_semana
+                     e.tiempo_promedio, e.orden_compensacion, e.dias_trabajados_semana, e.bonus_semana
             ORDER BY e.acumulado_semanal ASC    
         `)
 
@@ -287,18 +286,6 @@ export async function darBonus(req: RequestConUsuario, res: Response) {
     if(monto > disponible){
       return res.status(400).json({
         mensaje: `Presupuesto insuficiente. Disponible: $${disponible.toLocaleString('es-AR')}`
-      })
-    }
-    //Verificar bonus máximo del asesor
-    const asesorResult = await pool.query(`
-      SELECT bonus_maximo, bonus_disponible FROM empleados WHERE id_usuario = $1
-    `, [id])
-
-    const asesor = asesorResult.rows[0]
-
-    if(monto > parseFloat(asesor.bonus_maximo)){
-      return res.status(400).json({
-        mensaje: `El monto supera el limite del asesor. Máximo: $${parseFloat(asesor.bonus_maximo).toLocaleString('es-AR')}`
       })
     }
 

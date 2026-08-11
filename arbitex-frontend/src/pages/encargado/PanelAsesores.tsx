@@ -7,6 +7,7 @@ type Asesor = {
   id_usuario: number,
   acumulado_semanal: number
   acumulado_distribucion: number,
+  bonus_semana: number,
   sesion_activa: boolean
   tiempo_promedio: number
   orden_compensacion: number
@@ -21,7 +22,7 @@ function PanelAsesores() {
   const [ loading, setLoading] = useState(true)
   const [bonusAsesor, setBonusAsesor] = useState<number | null>(null)
   const [montoBonusInput, setMontoBonusInput] = useState('')
-  const [mensajeBonus, setMensajeBonus] = useState('')
+  const [mensajeBonus, setMensajeBonus] = useState<{id: number, mensaje: string} | null>(null)
   async function  cargarAsesores() {
       try{
         const token = localStorage.getItem('token')
@@ -70,12 +71,12 @@ function PanelAsesores() {
         body: JSON.stringify({monto: Number(montoBonusInput)})
       })
       const data = await res.json()
-      setMensajeBonus(data.mensaje)
+      setMensajeBonus({id: idUsuario, mensaje: data.mensaje})
       setBonusAsesor(null)
       setMontoBonusInput('')
       cargarAsesores()
     }catch{
-      setMensajeBonus('Error al conectar al servidor')
+      setMensajeBonus({id: idUsuario, mensaje:'Error al conectar al servidor'})
     }
   }
   
@@ -133,7 +134,7 @@ function PanelAsesores() {
 
               <div className="asesor-info">
                 <p className='asesor-label'>Comisión</p>
-                <p className='asesor-valor'>${Number(asesor.comision).toLocaleString('es-AR')}</p>
+                <p className='asesor-valor'>${(Number(asesor.comision)+ Number(asesor.bonus_semana)).toLocaleString('es-AR')}</p>
               </div>
 
               <div className="asesor-info">
@@ -146,7 +147,7 @@ function PanelAsesores() {
 
               <div className='asesor-info'>
                 <p className='asesor-label'>Bonus</p>
-                {mensajeBonus && <p className='asesorLabel'>{mensajeBonus}</p>}
+                {mensajeBonus?.id === asesor.id_usuario && <p className='asesorLabel'>{mensajeBonus.mensaje}</p>}
 
                 {
                   bonusAsesor === asesor.id_usuario ? (

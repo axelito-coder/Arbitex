@@ -14,8 +14,7 @@ export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
               v.marca, v.modelo, v.version,
               vc.nro_serie, vc.km, vc.patente,
               u.nombre AS asesor,
-              f.nro_factura, f.total,
-              co.monto AS comision
+              f.nro_factura, f.total
             FROM turnos t
             JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
             JOIN clientes c ON c.id = vc.id_cliente
@@ -23,7 +22,6 @@ export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
             LEFT JOIN empleados e ON e.id = t.id_asesor
             LEFT JOIN usuarios u ON u.id = e.id_usuario
             LEFT JOIN facturas f ON f.id_turno = t.id
-            LEFT JOIN comisiones co ON co.id_factura = f.id
             WHERE t.id = $1
         `, [id])
         if(turnoResult.rows.length === 0){
@@ -206,11 +204,6 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
         `, [nroFactura, id, total])
 
         //5. Crear comision
-        const monto = total * 0.01
-        await pool.query(`
-            INSERT INTO comisiones (id_factura, monto)
-            VALUES ($1, $2)
-        `, [facturaResult.rows[0].id, monto])
 
         await pool.query(`
          UPDATE empleados
@@ -276,7 +269,7 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
                 AND vc.id = t.id_vehiculo_cliente
             `, [patente || '', vehiculo.nro_serie || '', parseInt(vehiculo.km) || 0, id])
         }
-
+        const monto = total * 0.01
         return res.json({ mensaje: 'Turno finalizado correctamente', total, comision: monto})
     }catch (err){
         console.error(err)

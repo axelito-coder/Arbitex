@@ -31,7 +31,6 @@ type Detalle = {
     asesor: string,
     nro_factura: string
     total: number,
-    comision: number,
     duracion_minutos: number | null
     items: Item[]
 }
@@ -155,7 +154,7 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props){
                         </div>
                         <div className='detalle-total-fila detalle-comision'>
                             <span>Comision ($1)</span>
-                            <span>${Number(detalle.comision).toLocaleString('es-AR')}</span>
+                            <span>${Number(detalle.total * 0.01).toLocaleString('es-AR')}</span>
                         </div>
                     </div>
                 )}
