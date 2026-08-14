@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import AgregarItems from '../pages/asesor/AgregarItems'
 import '../styles/DetalleTurno.css'
 
 
@@ -52,20 +53,21 @@ function formatearFecha(fechaISO: string){
 
 function DetalleTurno({ idTurno, onVolver, urlBase }: Props){
     const [detalle, setDetalle] = useState<Detalle | null>(null)
-
-    useEffect(() => {
-        async function  cargarDetalle() {
-            try{
-                const token = localStorage.getItem('token')
-                const res = await fetch(`${urlBase}/turnos/${idTurno}/detalle`, {  //traemos el turno
+    const [agregando, setAgregando ] = useState(false)
+    const [exito, setExito] = useState('')
+    async function  cargarDetalle() {
+        try{
+            const token = localStorage.getItem('token')
+            const res = await fetch(`${urlBase}/turnos/${idTurno}/detalle`, {  //traemos el turno
                     headers: { Authorization: `Bearer ${token}`}
-                })
-                const data = await res.json()
-                if(res.ok) setDetalle(data)
-            }catch (err){
+            })
+            const data = await res.json()
+            if(res.ok) setDetalle(data)
+        }catch (err){
            console.error(err)   
         } 
-        }
+    }
+    useEffect(() => {
         cargarDetalle()
     }, [idTurno])
 
@@ -156,6 +158,24 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props){
                             <span>Comision ($1)</span>
                             <span>${Number(detalle.total * 0.01).toLocaleString('es-AR')}</span>
                         </div>
+                    </div>
+                )}
+
+                {detalle.estado === 'finalizado' && urlBase.includes('asesor') &&(
+                    <div className='detalle-seccion agregar'>
+                        {exito && <div className='cargar-exito'>{exito}</div>}
+                        {!agregando ? (
+                            <button className='detalle-volver' onClick={() => setAgregando(true)}>+ Agregar trabajo adicional</button>
+                        ) : (
+                            <AgregarItems idTurno={idTurno} urlBase={urlBase}
+                            onAgregado={() => {
+                                setAgregando(false)
+                                setExito('Trabajo adicional agregado')
+                                cargarDetalle()
+                            }}
+                            onCancelar={() => setAgregando(false)}
+                            />
+                        )}
                     </div>
                 )}
             </div>

@@ -143,7 +143,7 @@ function FinalizarTurno({ idTurno, cliente, tipoService, onFinalizado, onCancela
                                 <input type="text" className="item-input" placeholder="Descripcion" value={item.descripcion} onChange={(e) => handleItemChange(i, 'descripcion', e.target.value)} />
 
                                 <div className="item-fila">
-                                    <input type="number" min={1} className="item-input item-numero" placeholder="Cantidad" disabled= {item.tipo === 'mano_obra'} value={item.cantidad} onChange={(e) => handleItemChange(i, 'cantidad', parseFloat(e.target.value))}/>
+                                    <input type="number" min={1}  className="item-input item-numero" placeholder="Cantidad" disabled= {item.tipo === 'mano_obra'} value={item.cantidad} onChange={(e) => handleItemChange(i, 'cantidad', parseFloat(e.target.value))}/>
                                     <input type="number" min={1} className="item-input item-numero" placeholder="Precio unitario" value={item.precio_unitario} onChange={(e) => handleItemChange(i, 'precio_unitario', parseFloat(e.target.value))} />
                                 </div>
                             </div>

@@ -158,14 +158,23 @@ async function cerrarTurnosPendientes(): Promise<void> {
 }
 
 async function aplicarAcumuladoFicticio(): Promise<void> {
-    //obtener asesores que no trabajaron ayer
+    //obtener el ultimo dia de actividad 
+    const ultimoDiaResult = await pool.query(`
+        SELECT MAX(fecha) AS ultimo_dia FROM turnos WHERE fecha < CURRENT_DATE
+    `)
+    const ultimoDia = ultimoDiaResult.rows[0].ultimo_dia
+    if(!ultimoDia) return
+
+    //obtener asesores que no trabajaron el ultimo dia
     const ausentes = await pool.query(`
         SELECT id, acumulado_distribucion FROM empleados
-        WHERE ultimo_dia_trabajado < CURRENT_DATE - 1
+        WHERE ultimo_dia_trabajado < $1
         OR ultimo_dia_trabajado IS NULL
-    `)
+    `, [ultimoDia])
+
     if(ausentes.rows.length === 0) return
-    //calcular promedio del equipo ayer
+
+    //calcular mediana del equipo en ese ultimo dia
     const promedioResult = await pool.query(`
         SELECT COALESCE(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_dia), 0) AS promedio
         FROM (
@@ -173,11 +182,11 @@ async function aplicarAcumuladoFicticio(): Promise<void> {
            FROM empleados e
            JOIN turnos t ON t.id_asesor = e.id
            JOIN facturas f ON f.id_turno = t.id
-           WHERE e.ultimo_dia_trabajado = CURRENT_DATE - 1
-           AND t.fecha = CURRENT_DATE - 1
+           WHERE e.ultimo_dia_trabajado = $1
+           AND t.fecha = $1
            GROUP BY e.id
         ) AS totales_dia
-    `)
+    `, [ultimoDia])
 
     const promedio = parseFloat(promedioResult.rows[0].promedio)
 

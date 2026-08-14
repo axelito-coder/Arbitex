@@ -23,9 +23,23 @@ function PanelAsesores() {
   const [bonusAsesor, setBonusAsesor] = useState<number | null>(null)
   const [montoBonusInput, setMontoBonusInput] = useState('')
   const [mensajeBonus, setMensajeBonus] = useState<{id: number, mensaje: string} | null>(null)
+  const [presupuesto, setPresupuesto] = useState({bonus: 0, usado: 0})
   async function  cargarAsesores() {
       try{
+
+        //traemos el token para hacer las llamadas al back
         const token = localStorage.getItem('token')
+
+        //traemos los datos de bonus disponible en la tabla config
+        const resConfig = await fetch('http://localhost:3000/encargado/config', {
+          headers: { Authorization: `Bearer ${token}`}
+        })
+        const config = await resConfig.json()
+        if(resConfig.ok){
+          setPresupuesto({bonus: Number(config.presupuesto_bonus), usado: Number(config.presupuesto_usado) })
+        }
+
+        //traemos los datos de los encargados
         const res = await fetch('http://localhost:3000/encargado/asesores', {
           headers: { Authorization: `Bearer ${token}`}
         })
@@ -83,6 +97,24 @@ function PanelAsesores() {
   return (
     <div className="panel">
 
+      <div className='panel-presupuesto'>
+
+        <p className='seccion-titulo'>Panel de Asesores</p>
+
+        <div className='presupuesto'>
+          <div>
+            <p className='detalle-label'>Presupuesto de bonus</p>
+            <p className='asesor-valor'>${Number(presupuesto.bonus).toLocaleString('es-AR')}</p>
+          </div>
+
+          <div>
+            <p className='detalle-label'>Presupuesto usado</p>
+            <p className='asesor-valor'>${Number(presupuesto.usado).toLocaleString('es-AR')}</p>
+          </div>
+
+        </div>
+
+      </div>
       {/* TARJETAS DE ASESORES */}
       <div className="panel-tarjetas">
         {asesores.map((asesor, i) => {

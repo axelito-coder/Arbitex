@@ -117,6 +117,7 @@
 @media print {
   .detalle-header { display: none; }
   .detalle-card { box-shadow: none; }
+  .agregar {display: none;}
 
   body * {
     visibility: hidden;

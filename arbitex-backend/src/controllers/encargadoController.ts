@@ -2,10 +2,17 @@ import { Response } from 'express'
 import pool from '../db'
 import { RequestConUsuario } from '../middlewares/authMiddleware'
 
-
+export async function  getConfig(req: RequestConUsuario, res: Response) {
+  try{
+    const result = await pool.query('SELECT presupuesto_bonus, presupuesto_usado FROM config WHERE id = 1')
+    return res.json(result.rows[0])
+  }catch (err){
+    console.error(err)
+    return res.status(500).json({mensaje: 'Error interno del servidor'})
+  }
+}
 export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
     const { id } = req.params
-
     try{
         const turnoResult = await pool.query(`
             SELECT t.id, t.fecha, t.hora_carga, t.hora_inicio_atencion, t.hora_cierre_atencion,

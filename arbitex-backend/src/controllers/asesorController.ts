@@ -276,3 +276,60 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
         return res.status(500).json({ mensaje: 'Error interno del servidor'})
     }
 }
+
+export async function  agregarItems(req: RequestConUsuario, res: Response) {
+    const { id } = req.params
+    const { items } = req.body
+
+    if(!items || items.length === 0){
+        return res.status(400).json({ mensaje: 'Debe cargar al menos un item'})
+    }
+
+    try{
+        const turnoResult = await pool.query(`
+            SELECT t.id FROM turnos t
+            JOIN empleados e ON e.id = t.id_asesor
+            WHERE t.id = $1
+            AND e.id_usuario = $2
+            AND t.estado = 'finalizado'
+        `, [id, req.usuario?.id])
+
+        if(turnoResult.rows.length === 0){
+            return res.status(404).json({ mensaje: 'Turno no encontrado o no esta finalizado'})
+        }
+
+        //insertar nuevos items
+        for(const item of items){
+            await pool.query(`
+                INSERT INTO items_turno (id_turno, descripcion, cantidad, precio_unitario, tipo) VALUES ($1, $2, $3, $4, $5)
+            `, [id, item.descripcion, item.cantidad, item.precio_unitario, item.tipo])
+        }
+
+        //recalcular total
+        const totalResult = await pool.query(`
+            SELECT SUM(cantidad * precio_unitario) AS total FROM items_turno WHERE id_turno = $1
+        `, [id])
+        const total = parseFloat(totalResult.rows[0].total)
+
+        //actualizar factura existente
+        await pool.query(`
+            UPDATE facturas SET total = $1 WHERE id_turno = $2
+        `, [total, id])
+
+        let nuevosItems = 0
+        for(const item of items){
+            nuevosItems += item.cantidad * item.precio_unitario
+        }
+        //actualizar el acumulado del asesor con el monto adicional
+        await pool.query(`
+            UPDATE empleados
+            SET acumulado_semanal = acumulado_semanal + $1,
+                acumulado_distribucion = acumulado_distribucion + $1
+            WHERE id_usuario = $2
+        `, [nuevosItems, req.usuario?.id])
+        return res.json({ mensaje: 'items agregados correctamente', total})
+    }catch(err){
+        console.error(err)
+        return res.status(500).json({ mensaje: 'Error interno del sevidor'})
+    }
+}
