@@ -237,17 +237,41 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
             WHERE id_usuario = $1
         `, [req.usuario?.id])
 
+        let vehiculoExistente = false;
+
         if(patente){
-            await pool.query(`
+            //Buscar si ya existe un vehiculo_cliente con esa patente
+            const vcExiste = await pool.query(`
+                SELECT id FROM vehiculo_cliente WHERE patente = $1
+            `, [patente])
+            if(vcExiste.rows.length > 0){
+                //vincular el turno al vehiculo_cliente existente
+                vehiculoExistente = true
+                const idVcExistente = vcExiste.rows[0].id
+
+                await pool.query(`
+                    UPDATE turnos SET id_vehiculo_cliente = $1 WHERE id = $2
+                `, [idVcExistente, id])
+
+                //actualizar km si se proporcionó
+                if(vehiculo && vehiculo.km){
+                    await pool.query(`
+                        UPDATE vehiculo_cliente SET km = $1 WHERE id = $2
+                    `, [parseInt(vehiculo.km), idVcExistente])
+                }
+            }else{
+                //Guardar la patente en el vehiculo_cliente actual
+                 await pool.query(`
                 UPDATE vehiculo_cliente vc
                 SET patente = $1
                 FROM turnos t
                 WHERE t.id = $2
                 AND vc.id = t.id_vehiculo_cliente
             `, [patente, id])
+            }
         }
 
-        if(vehiculo && (vehiculo.marca || vehiculo.modelo)){
+        if( !vehiculoExistente && (vehiculo.marca || vehiculo.modelo)){
             await pool.query(`
                 UPDATE vehiculos v
                 SET marca = COALESCE(NULLIF($1, ''), v.marca),

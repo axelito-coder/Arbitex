@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getTurnosHoy, getPanelAsesores, getHistorial, getDetalleTurno, crearAsesor, editarAsesor, desactivarAsesor, darBonus, getConfig } from "../controllers/encargadoController";
+import { getTurnosHoy, getPanelAsesores, getHistorial, getDetalleTurno, crearAsesor, editarAsesor, desactivarAsesor, darBonus, getConfig, getVehiculosFrecuentes } from "../controllers/encargadoController";
 import { cargarTurno } from "../controllers/turnosController";
 import { verificarToken, soloEncargado } from "../middlewares/authMiddleware";
 
@@ -13,6 +13,7 @@ encargadoRouter.get('/turnos/hoy', getTurnosHoy)
 encargadoRouter.get('/asesores', getPanelAsesores)
 encargadoRouter.get('/historial', getHistorial)
 encargadoRouter.get('/config', getConfig)
+encargadoRouter.get('/vehiculos/frecuentes', getVehiculosFrecuentes)
 encargadoRouter.post('/turnos', cargarTurno)
 encargadoRouter.post('/asesores', crearAsesor)
 encargadoRouter.post('/asesores/:id/bonus', darBonus)

@@ -269,19 +269,34 @@ async function asignarTurno(idTurno: number): Promise<void> { //funcion principa
 
 export async function cargarTurno(req: RequestConUsuario, res: Response) {
     console.log('cargarTurno llamado', req.body)  // ← acá
-    const { nombre_cliente, email, telefono ,tipo_service} = req.body //se obtiene la informacion del turno desde el front
+    const { nombre_cliente, email, telefono, dni ,tipo_service} = req.body //se obtiene la informacion del turno desde el front
 
     if(!nombre_cliente || !tipo_service){
         return res.status(400).json({ mensaje: 'Faltan datos requeridos'}) //si hay error en el front
     }
 
     try {
-    // 1. Crear cliente
-    const clienteResult = await pool.query(`
-      INSERT INTO clientes (nombre, email, telefono) VALUES ($1, $2, $3) RETURNING id
-    `, [nombre_cliente, email || null, telefono || null])
-    const idCliente = clienteResult.rows[0].id
+    // 1. Buscar o crear cliente por DNI
+    let idCliente: number
+    const clienteExiste = await pool.query(`
+      SELECT id FROM clientes WHERE dni = $1
+    `, [dni])
 
+    if (clienteExiste.rows.length > 0) {
+      idCliente = clienteExiste.rows[0].id
+      await pool.query(`
+        UPDATE clientes
+        SET nombre = $1,
+            email = COALESCE(NULLIF($2, ''), email),
+            telefono = COALESCE(NULLIF($3, ''), telefono)
+        WHERE id = $4
+      `, [nombre_cliente, email || '', telefono || '', idCliente])
+    } else {
+      const clienteResult = await pool.query(`
+        INSERT INTO clientes (nombre, email, telefono, dni) VALUES ($1, $2, $3, $4) RETURNING id
+      `, [nombre_cliente, email || null, telefono || null, dni])
+      idCliente = clienteResult.rows[0].id
+    }
     // 2. Crear o buscar vehículo
     const vehiculoResult = await pool.query(`
         INSERT INTO vehiculos (marca, modelo) VALUES ('Sin especificar', 'Sin especificar') RETURNING id

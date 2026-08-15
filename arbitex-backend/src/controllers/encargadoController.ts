@@ -11,6 +11,30 @@ export async function  getConfig(req: RequestConUsuario, res: Response) {
     return res.status(500).json({mensaje: 'Error interno del servidor'})
   }
 }
+
+export async function getVehiculosFrecuentes(req: RequestConUsuario, res: Response) {
+  try{
+    const result = await pool.query(`
+      SELECT vc.patente, v.marca, v.modelo, v.version,
+             MAX(c.nombre) AS cliente, MAX(c.telefono) AS telefono, MAX(c.email) AS email,
+             COUNT(t.id) AS visitas,
+             MAX(t.fecha) AS ultimo_service,
+             COALESCE(SUM(f.total), 0) AS total_facturado
+      FROM vehiculo_cliente vc
+      JOIN vehiculos v ON v.id = vc.id_vehiculo
+      JOIN clientes c ON c.id = vc.id_cliente
+      JOIN turnos t ON t.id_vehiculo_cliente = vc.id
+      LEFT JOIN facturas f ON f.id_turno = t.id
+      WHERE t.estado = 'finalizado'
+      GROUP BY vc.id, vc.patente, v.marca, v.modelo, v.version
+      ORDER BY visitas DESC
+    `)
+    return res.json(result.rows)
+  }catch(err){
+    console.error(err)
+    return res.status(500).json({mensaje: 'Error interno en el servidor'})
+  }
+}
 export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
     const { id } = req.params
     try{
@@ -136,63 +160,7 @@ export async function  getHistorial(req: RequestConUsuario, res: Response) {
     }
 }
 
-//Cargar turno
-export async function cargarTurno(req: RequestConUsuario, res: Response) {
-  const { nombre_cliente, marca, modelo, version, nro_serie, km, tipo_service, horario } = req.body
 
-  if (!nombre_cliente || !tipo_service) {
-    return res.status(400).json({ mensaje: 'Faltan datos requeridos' })
-  }
-
-  let horarioCompleto = null
-  if (horario) {
-    const hoy = new Date().toISOString().split('T')[0]
-    horarioCompleto = `${hoy} ${horario}:00`
-  }
-
-  try {
-    // 1. Crear cliente
-    const clienteResult = await pool.query(`
-      INSERT INTO clientes (nombre) VALUES ($1) RETURNING id
-    `, [nombre_cliente])
-    const idCliente = clienteResult.rows[0].id
-
-    // 2. Crear o buscar vehículo en el catálogo
-    let idVehiculo
-    const vehiculoExiste = await pool.query(`
-      SELECT id FROM vehiculos WHERE marca = $1 AND modelo = $2 AND COALESCE(version, '') = $3
-    `, [marca || 'Sin especificar', modelo || 'Sin especificar', version || ''])
-
-    if (vehiculoExiste.rows.length > 0) {
-      idVehiculo = vehiculoExiste.rows[0].id
-    } else {
-      const vehiculoResult = await pool.query(`
-        INSERT INTO vehiculos (marca, modelo, version) VALUES ($1, $2, $3) RETURNING id
-      `, [marca || 'Sin especificar', modelo || 'Sin especificar', version || null])
-      idVehiculo = vehiculoResult.rows[0].id
-    }
-
-    // 3. Crear vehiculo_cliente
-    const vcResult = await pool.query(`
-      INSERT INTO vehiculo_cliente (id_vehiculo, id_cliente, nro_serie, km)
-      VALUES ($1, $2, $3, $4) RETURNING id
-    `, [idVehiculo, idCliente, nro_serie || null, km || null])
-    const idVehiculoCliente = vcResult.rows[0].id
-
-    // 4. Crear turno
-    const result = await pool.query(`
-      INSERT INTO turnos (id_vehiculo_cliente, tipo_service, horario, estado, fecha)
-      VALUES ($1, $2, $3, 'pendiente', CURRENT_DATE)
-      RETURNING *
-    `, [idVehiculoCliente, tipo_service, horarioCompleto])
-
-    return res.status(201).json(result.rows[0])
-
-  } catch (err) {
-    console.error(err)
-    return res.status(500).json({ mensaje: 'Error interno del servidor' })
-  }
-}
 
 
 //Crear asesor
