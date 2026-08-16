@@ -123,32 +123,6 @@ export async function getTurnosSemana(req: RequestConUsuario, res: Response) {
   }
 }
 
-//Iniciar atencion de un turno
-
-export async function  iniciarAtencion(req: RequestConUsuario, res: Response) {
-    const { id } = req.params
-
-    try{
-        const result = await pool.query(`
-            UPDATE turnos
-            set estado = 'en_proceso', hora_inicio_atencion = NOW()
-            WHERE id = $1
-            AND id_asesor = (SELECT id FROM empleados WHERE id_usuario = $2)
-            AND estado = 'asignado'
-            RETURNING *
-        `, [id, req.usuario?.id])
-
-        if(result.rows.length === 0){
-            return res.status(404).json({ mensaje: 'Turno no encontrado o no disponible' })
-        }
-
-        return res.json(result.rows[0])
-    }catch (err){
-        console.error(err)
-        return res.status(500).json({mensaje: 'Error interno del servidor'})
-    }
-}
-
 
 export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
     const { id } = req.params
@@ -301,7 +275,7 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
     }
 }
 
-export async function  agregarItems(req: RequestConUsuario, res: Response) {
+export async function  agregarItems(req: RequestConUsuario, res: Response) { //para modficar el turno después de haber finalizado
     const { id } = req.params
     const { items } = req.body
 

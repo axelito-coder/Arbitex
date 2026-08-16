@@ -290,8 +290,8 @@ export async function cargarTurno(req: RequestConUsuario, res: Response) {
             email = COALESCE(NULLIF($2, ''), email),
             telefono = COALESCE(NULLIF($3, ''), telefono)
         WHERE id = $4
-      `, [nombre_cliente, email || '', telefono || '', idCliente])
-    } else {
+       `, [nombre_cliente, email || '', telefono || '', idCliente]) //se modifica los datos si cambiaron el nombre, email o teléfono
+    } else {//si es cliente nuevo
       const clienteResult = await pool.query(`
         INSERT INTO clientes (nombre, email, telefono, dni) VALUES ($1, $2, $3, $4) RETURNING id
       `, [nombre_cliente, email || null, telefono || null, dni])

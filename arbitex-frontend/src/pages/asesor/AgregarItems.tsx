@@ -22,11 +22,11 @@ function AgregarItems({ idTurno, urlBase, onAgregado, onCancelar}: Props){
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
 
-    function AgregarItem(){
+    function AgregarItem(){//para agregar items al turno
         setItems([...items, {descripcion: '', cantidad: 1, precio_unitario: 0, tipo: 'repuesto'}])
     }
 
-    function eliminarItem(index: number){
+    function eliminarItem(index: number){ 
         setItems(items.filter((_, i) => i !== index))
     }
 
@@ -34,14 +34,15 @@ function AgregarItems({ idTurno, urlBase, onAgregado, onCancelar}: Props){
         const nuevos = [...items]
         nuevos[index] = {...nuevos[index], [campo]: valor}
 
-        if(campo === 'tipo' &&  valor === 'mano_obra'){
+        if(campo === 'tipo' &&  valor === 'mano_obra'){ //si es mano de obra, la cantidad se fija a 1
             nuevos[index].cantidad = 1;
         }
         setItems(nuevos)
     }
 
     let total = 0
-    for(const item of items){
+
+    for(const item of items){ //para mostrar el total de los items
         total += item.cantidad * item.precio_unitario
     }
     async function  handleConfirmar() {
@@ -54,7 +55,7 @@ function AgregarItems({ idTurno, urlBase, onAgregado, onCancelar}: Props){
         setError('')
         try{
            const token = localStorage.getItem('token')
-           const res = await fetch(`${urlBase}/turnos/${idTurno}/items`, {
+           const res = await fetch(`${urlBase}/turnos/${idTurno}/items`, { //Para hacer el post de agregar items al turno finalizado
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

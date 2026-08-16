@@ -20,7 +20,7 @@ function GestionAsesores(){
         cargarAsesores()
     }, [])
 
-    async function  cargarAsesores() { 
+    async function  cargarAsesores() { //traemos todos los asesores
         try{
             const token = localStorage.getItem('token')
             const res = await fetch('http://localhost:3000/encargado/asesores', {
@@ -108,6 +108,8 @@ function GestionAsesores(){
 
     if(modo === 'crear' || modo === 'editar'){ //aca segun si el modo es de editar o crear se cambia lo que muestra el componente,
         //como crear y editar usan el mismo formulario, se puede usar lo mismo, solamente para editar se muestra ya los datos existentes
+        
+        //Esto después lo voy a modificar para tratar que sea un componente diferente, no es bueno tener tanto código así
         return(
             <div className='gestion-form'>
                 <div className='gestion-card'>

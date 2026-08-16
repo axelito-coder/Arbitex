@@ -22,7 +22,7 @@ function getClaseEstado(estado: string) {
   return 'badge badge-gris'
 }
 
-function formatearFecha(fechaISO: string){
+function formatearFecha(fechaISO: string){ //para que la fecha se vea bien
   const fecha = new Date(fechaISO)
   return fecha.toLocaleDateString('es-AR', {
     day: '2-digit',
@@ -59,13 +59,17 @@ function Historial() {
   if(loading){
     return <p className='seccion-titulo'>Cargando...</p>
   }
-const asesores = [...new Set(turnos.map(t => t.asesor).filter(Boolean))]
+const asesores = [...new Set(turnos.map(t => t.asesor).filter(Boolean))] //para filtrar los turnos según asesor o estado
   const turnosFiltrados = turnos.filter((t) => {
     if (filtroAsesor && t.asesor !== filtroAsesor) return false
     if (filtroEstado && t.estado !== filtroEstado) return false
     
     return true
   })
+
+  
+  //acá se van a mostrar dos cosas según el boton de detallesTurno, por defecto se ve todo el historial, si se presiona el botón se devuelve el otro componente
+  //ESTO es lo que voy a hacer en Gestíon asesores para tratar de reducir el código en un solo archivo
 
   if(turnoDetalle){
     return(

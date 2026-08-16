@@ -27,7 +27,7 @@ function Dashboard() {
   const [alertas, setAlertas] = useState<Alerta[]>([])
   const [loading, setLoading] = useState(true)
   useEffect(() => {
-    async function cargarDatos() {
+    async function cargarDatos() { //función para traer los turnos del día
       try {
         const token = localStorage.getItem('token')
         const res = await fetch('http://localhost:3000/encargado/turnos/hoy', {
@@ -60,7 +60,7 @@ function Dashboard() {
     cargarDatos()
   }, [])
 
-  const resumen = [
+  const resumen = [ //estados de los turnos del día
     { label: 'Total del día', valor: turnos.length },
     { label: 'Asignados',     valor: turnos.filter(t => t.estado === 'asignado').length },
     { label: 'En proceso',    valor: turnos.filter(t => t.estado === 'en_proceso').length },

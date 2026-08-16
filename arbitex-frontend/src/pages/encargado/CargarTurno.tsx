@@ -60,7 +60,7 @@ function CargarTurno(){
 
     setLoading(true)
     setError('')
-    try{
+    try{//hacemos el post para cargar turno
        const token = localStorage.getItem('token')
        const res = await fetch('http://localhost:3000/encargado/turnos', {
         method: 'POST',

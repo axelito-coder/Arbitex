@@ -72,7 +72,7 @@ function PanelAsesores() {
     distribucion: Number(a.acumulado_distribucion)
   }))
 
-  async function  handleDarBonus(idUsuario: number) {
+  async function  handleDarBonus(idUsuario: number) { //post para mandar el bonus al asesor
     if(!montoBonusInput || Number(montoBonusInput) <= 0) return
     try{
       const token = localStorage.getItem('token')

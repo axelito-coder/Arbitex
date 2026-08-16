@@ -12,9 +12,10 @@ export async function  getConfig(req: RequestConUsuario, res: Response) {
   }
 }
 
-export async function getVehiculosFrecuentes(req: RequestConUsuario, res: Response) {
-  try{
-    const result = await pool.query(`
+export async function getVehiculosFrecuentes(req: RequestConUsuario, res: Response) { //endpoint para que los chicos hagan vista de estaditicas de autos y clientes
+  try{//Se tae los datos de los vehiculos que vienen a la concesionaria ordenados segun la cantidad de veces que fueron segun su patente, también los datos del cliente
+   
+    const result = await pool.query(` 
       SELECT vc.patente, v.marca, v.modelo, v.version,
              MAX(c.nombre) AS cliente, MAX(c.telefono) AS telefono, MAX(c.email) AS email,
              COUNT(t.id) AS visitas,
@@ -29,13 +30,13 @@ export async function getVehiculosFrecuentes(req: RequestConUsuario, res: Respon
       GROUP BY vc.id, vc.patente, v.marca, v.modelo, v.version
       ORDER BY visitas DESC
     `)
-    return res.json(result.rows)
+    return res.json(result.rows) 
   }catch(err){
     console.error(err)
     return res.status(500).json({mensaje: 'Error interno en el servidor'})
   }
 }
-export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
+export async function  getDetalleTurno(req:RequestConUsuario, res: Response) { //Para traer toda la información de un turno
     const { id } = req.params
     try{
         const turnoResult = await pool.query(`
@@ -58,7 +59,8 @@ export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
         if(turnoResult.rows.length === 0){
             return res.status(404).json({ mensaje: 'Turno no encontrado'})
         }
-        const itemsResult = await pool.query(`
+        //por separado traemos los items del turno
+        const itemsResult = await pool.query(` 
             SELECT descripcion, cantidad, precio_unitario, tipo
             FROM items_turno
             WHERE id_turno = $1

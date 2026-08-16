@@ -25,7 +25,7 @@ type Turno = {
 function MiPerfil() {
   const [perfil, setPerfil] = useState<Perfil | null>(null)
   const [turnos, setTurnos] = useState<Turno[]>([])
-  const [grafico, setGrafico] = useState<'acumulado' | 'tiempos'>('acumulado')
+  const [grafico, setGrafico] = useState<'acumulado' | 'tiempos'>('acumulado') //Se usa para mostrar alguno de los gráficos
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -109,7 +109,7 @@ function MiPerfil() {
         </div>
       </div>
 
-      {/* GRAFICOS */}
+      {/* GRAFICOS */} {/* Segun el boton que se presiona se cambia el estado de gráfico para mostrar el indicado */}
       <div className="perfil-seccion">
         <div className="grafico-botones">
           <button
@@ -123,7 +123,7 @@ function MiPerfil() {
             onClick={() => setGrafico('tiempos')}
           >
             Tiempos
-          </button>
+          </button> 
         </div>
 
         {grafico === 'acumulado' && (
