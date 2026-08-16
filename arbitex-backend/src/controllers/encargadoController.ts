@@ -36,6 +36,67 @@ export async function getVehiculosFrecuentes(req: RequestConUsuario, res: Respon
     return res.status(500).json({mensaje: 'Error interno en el servidor'})
   }
 }
+
+//Lo mismo que la anterior pero agrupamos por cliente
+export async function  getClientes(req: RequestConUsuario, res: Response) {
+  try{
+    const result = await pool.query(`
+      SELECT c.id, c.nombre, c.dni, c.email, c.telefono,
+             COUNT(DISTINCT t.id) AS visitas,
+             MAX(t.fecha) AS ultimo_service,
+             COALESCE(SUM(f.total), 0) AS total_facturado
+      FROM clientes c
+      LEFT JOIN vehiculo_cliente vc ON vc.id_cliente = c.id
+      LEFT JOIN turnos t ON t.id_vehiculo_cliente  = vc.id AND t.estado = 'finalizado'
+      LEFT JOIN facturas f ON f.id_turno = t.id
+      GROUP BY c.id, c.nombre, c.dni, c.email, c.telefono
+      ORDER BY visitas DESC NULLS LAST
+    `)
+    return res.json(result.rows)
+  }catch (err){
+    console.error(err)
+    return res.status(500).json({mensaje: 'Error interno del servidor'})
+  }
+}
+
+//obtener detalle de cliente por dni
+export async function getClienteDetalle(req: RequestConUsuario, res: Response) {
+  const { dni } = req.params
+  try{
+    const clienteResult = await pool.query(`
+      SELECT id, nombre, dni, email, telefono FROM clientes WHERE dni = $1
+    `, [dni])
+
+    if(clienteResult.rows.length === 0){
+      return res.status(404).json({ mensaje: 'Cliente no encontrado'})
+    }
+
+    const turnoResult = await pool.query(`
+      SELECT t.id, t.fecha, t.tipo_service, t.estado,
+             vc.patente, v.marca, v.modelo, v.version,
+             f.total, u.nombre AS asesor
+      FROM turnos t
+      JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
+      JOIN vehiculos v ON v.id = vc.id_vehiculo
+      JOIN clientes c ON c.id = vc.id_cliente
+      LEFT JOIN facturas f ON f.id_turno = t.id
+      LEFT JOIN empleados e ON e.id = t.id_asesor
+      LEFT JOIN usuarios u ON u.id = e.id_usuario
+      WHERE c.dni = $1
+      ORDER BY t.fecha DESC    
+    `, [dni])
+
+    return res.json({
+      ...clienteResult.rows[0],
+      turnos: turnoResult.rows
+    })
+  }catch(err){
+    console.error(err)
+    return res.status(500).json({ mensaje: 'Error interno del servidor'})
+  }
+}
+
+
 export async function  getDetalleTurno(req:RequestConUsuario, res: Response) { //Para traer toda la información de un turno
     const { id } = req.params
     try{
