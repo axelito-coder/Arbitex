@@ -107,7 +107,7 @@ function PanelAsesores() {
             <p className='asesor-valor'>${Number(presupuesto.bonus).toLocaleString('es-AR')}</p>
           </div>
 
-          <div>
+          <div className='usado'>
             <p className='detalle-label'>Presupuesto usado</p>
             <p className='asesor-valor'>${Number(presupuesto.usado).toLocaleString('es-AR')}</p>
           </div>

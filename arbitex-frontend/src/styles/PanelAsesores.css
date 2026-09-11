@@ -131,6 +131,12 @@
   border-radius: 99px;
   font-weight: 600;
 }
+.presupuesto{
+  display: flex;
+}
+.usado{
+  margin-left: 20px;
+}
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
