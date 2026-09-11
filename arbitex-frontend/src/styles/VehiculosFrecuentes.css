@@ -1,0 +1,77 @@
+.vehiculos {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* RESUMEN */
+.vehiculos-resumen {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.resumen-datos {
+  display: flex;
+  gap: 48px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.detalle-label {
+  font-size: 12px;
+  color: #595959;
+  margin: 0 0 4px 0;
+}
+
+/* FILTROS */
+.vehiculos-filtros {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+/* TABLA */
+.vehiculos-tabla {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.patente {
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  background: #F5F5F5;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  padding: 3px 8px;
+}
+
+/* GRÁFICO */
+.vehiculos-grafico {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .resumen-datos {
+    gap: 24px;
+  }
+
+  .vehiculos-filtros {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

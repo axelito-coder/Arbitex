@@ -11,6 +11,8 @@ import Historial from './pages/encargado/Historial'
 import Login from './pages/Login'
 import './App.css'
 import GestionAsesores from './pages/encargado/GestionAsesores'
+import VehiculosFrecuentes from './pages/encargado/VehiculosFrecuentes'
+import Clientes from './pages/encargado/Clientes'
 
 function App() {
   const [sidebar, setSidebar] = useState(true)
@@ -45,6 +47,8 @@ function App() {
           {pagina === 'asesores'  && <PanelAsesores />}
           {pagina === 'historial' && <Historial />}
           {pagina === 'asesores-gestion' && <GestionAsesores/>}
+          {pagina === 'vehiculos-frecuentes' && <VehiculosFrecuentes/>}
+          {pagina === 'clientes' && <Clientes />}
           {pagina === 'inicio'    && <Inicio />}
           {pagina === 'turnos'    && <MisTurnos />}
           {pagina === 'perfil'    && <MiPerfil />}
