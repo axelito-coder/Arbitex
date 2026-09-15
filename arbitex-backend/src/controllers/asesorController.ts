@@ -79,11 +79,14 @@ export async function  getTurnosHoy(req: RequestConUsuario, res: Response) {
             SELECT t.id, t.hora_carga, t.tipo_service, t.estado, t.hora_inicio_atencion,
             t.hora_cierre_atencion, t.duracion_minutos,
             c.nombre AS cliente,
-            v.marca || ' ' || v.modelo || ' ' || COALESCE(v.version, '') AS vehiculo
+            CASE
+             WHEN v.id IS NULL THEN 'Sin especificar'
+             ELSE v.marca || ' ' || v.modelo || ' ' || COALESCE(v.version, '')
+            END AS vehiculo
             FROM turnos t
             JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
             JOIN clientes c ON c.id = vc.id_cliente
-            JOIN vehiculos v ON v.id = vc.id_vehiculo
+            LEFT JOIN vehiculos v ON v.id = vc.id_vehiculo
             JOIN empleados e ON e.id = t.id_asesor
             WHERE e.id_usuario = $1
             AND t.fecha = CURRENT_DATE
@@ -246,17 +249,38 @@ export async function  finalizarTurno(req: RequestConUsuario, res: Response) {
         }
 
         if( !vehiculoExistente && (vehiculo.marca || vehiculo.modelo)){
-            await pool.query(`
-                UPDATE vehiculos v
-                SET marca = COALESCE(NULLIF($1, ''), v.marca),
-                    modelo = COALESCE(NULLIF($2, ''), v.modelo),
-                    version = COALESCE(NULLIF($3, ''), v.version)
-                FROM turnos t
-                JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
-                WHERE t.id = $4
-                AND v.id = vc.id_vehiculo
-            `, [vehiculo.marca || '', vehiculo.modelo || '', vehiculo.version || '', id])
+           const marcaNorm = (vehiculo.marca || '').trim().toUpperCase()
+           const modeloNorm = (vehiculo.modelo || '').trim().toUpperCase()
+           const versionNorm = (vehiculo.version || '').trim().toUpperCase()
 
+           const modeloExiste = await pool.query(`
+             SELECT id FROM vehiculos
+             WHERE UPPER(marca) = $1 AND UPPER(modelo) = $2
+            `, [marcaNorm, modeloNorm])
+
+            if(modeloExiste.rows.length === 0){
+             //crear vehiculo nuevo
+             const nuevoVehiculo = await pool.query(`
+                INSERT INTO vehiculos (marca, modelo, version)
+                VALUES ($1, $2, $3) RETURNING id
+             `, [marcaNorm, modeloNorm, versionNorm || null])
+             //Vincularlo al vehiculo_cliente del turno
+             await pool.query(`
+                UPDATE vehiculo_cliente vc
+                SET id_vehiculo = $1
+                FROM turnos t
+                WHERE t.id = $2
+                AND vc.id = t.id_vehiculo_cliente
+             `, [nuevoVehiculo.rows[0].id, id])
+            }else{
+                await pool.query(`
+                    UPDATE vehiculo_cliente vc
+                    SET id_vehiculo = $1
+                    FROM turnos t
+                    WHERE t.id = $2
+                    AND vc.id = t.id_vehiculo_cliente
+                `, [modeloExiste.rows[0].id, id])
+            }
             await pool.query(`
                 UPDATE vehiculo_cliente vc
                 SET patente = COALESCE(NULLIF($1, ''), vc.patente),

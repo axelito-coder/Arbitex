@@ -76,7 +76,7 @@ function Login({onLogin}: Props){
                 </button>
              </div>
              
-             <p className='login-footer'>Asahi Motors S.A  Sistena de gestión de service</p>
+             <p className='login-footer'>Asahi Motors S.A  Sistema de gestión de service</p>
             </div>
         </div>
     )

@@ -298,16 +298,11 @@ export async function cargarTurno(req: RequestConUsuario, res: Response) {
       idCliente = clienteResult.rows[0].id
     }
     // 2. Crear o buscar vehículo
-    const vehiculoResult = await pool.query(`
-        INSERT INTO vehiculos (marca, modelo) VALUES ('Sin especificar', 'Sin especificar') RETURNING id
-      `,)
-    const idVehiculo = vehiculoResult.rows[0].id
-    
 
     const vcResult = await pool.query(`
         INSERT INTO vehiculo_cliente (id_vehiculo, id_cliente)
-        VALUES ($1, $2) RETURNING id
-    `, [idVehiculo, idCliente])
+        VALUES (NULL, $1) RETURNING id
+    `, [idCliente])
 
     const idVehiculoCliente = vcResult.rows[0].id
 

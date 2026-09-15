@@ -139,8 +139,11 @@ export async function getTurnosHoy(req: RequestConUsuario, res: Response) {
     const result = await pool.query(`
       SELECT t.id, t.hora_carga, t.tipo_service, t.estado, t.es_compensacion,
        c.nombre AS cliente,
-       v.marca || ' ' || v.modelo || ' ' || COALESCE(v.version, '') AS vehiculo,
-       u.nombre AS asesor,
+       CASE
+        WHEN v.id IS NULL THEN 'Sin especificar'
+        ELSE v.marca || ' ' || v.modelo || ' ' || COALESCE(v.version, '')
+       END AS vehiculo,
+        u.nombre AS asesor,
        CASE
         WHEN t.estado = 'finalizado' THEN t.duracion_minutos
         WHEN t.estado = 'en_proceso' AND t.hora_inicio_atencion IS NOT NULL
@@ -150,7 +153,7 @@ export async function getTurnosHoy(req: RequestConUsuario, res: Response) {
       FROM turnos t
       JOIN vehiculo_cliente vc ON vc.id = t.id_vehiculo_cliente
       JOIN clientes c ON c.id = vc.id_cliente
-      JOIN vehiculos v ON v.id = vc.id_vehiculo
+      LEFT JOIN vehiculos v ON v.id = vc.id_vehiculo
       LEFT JOIN empleados e ON e.id = t.id_asesor
       LEFT JOIN usuarios u ON u.id = e.id_usuario
       WHERE t.fecha = CURRENT_DATE
