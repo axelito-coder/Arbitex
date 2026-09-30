@@ -63,6 +63,27 @@
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
+.ver-mas-contenedor {
+    display: flex;
+    justify-content: center;
+    padding: 16px 0;
+}
+
+.btn-ver-mas {
+    background: transparent;
+    border: 1px solid #EB0A1E;
+    color: #EB0A1E;
+    padding: 8px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-ver-mas:hover {
+    background: #EB0A1E;
+    color: white;
+}
 
 /* RESPONSIVE */
 @media (max-width: 768px) {

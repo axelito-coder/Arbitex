@@ -57,6 +57,7 @@ function Clientes() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
   const [busqueda, setBusqueda] = useState('')
+  const [visibles, setVisible] = useState(10)
 
   //cuando hay un dni seleccionado se muestra el detalle en vez de la lista
   const [dniDetalle, setDniDetalle] = useState<string | null>(null)
@@ -217,6 +218,8 @@ function Clientes() {
     )
   })
 
+  const clientesPaginados = clientesFiltrados.slice(0, visibles)
+
   return (
     <div className="clientes">
 
@@ -228,11 +231,11 @@ function Clientes() {
             className="filtro-select"
             placeholder='Nombre o DNI'
             value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
+            onChange={(e) => {setBusqueda(e.target.value); setVisible(10)}}
           />
         </div>
 
-        <button className="filtro-limpiar" onClick={() => setBusqueda('')}>
+        <button className="filtro-limpiar" onClick={() => {setBusqueda(''); setVisible(10)}}>
           Limpiar
         </button>
       </div>
@@ -259,7 +262,7 @@ function Clientes() {
                   <td colSpan={7} className="sin-datos">No hay clientes para mostrar</td>
                 </tr>
               ) : (
-                clientesFiltrados.map((c) => (
+                clientesPaginados.map((c) => (
                   <tr key={c.id} onClick={() => setDniDetalle(c.dni)} style={{ cursor: 'pointer' }}>
                     <td>{c.nombre}</td>
                     <td>{c.dni}</td>
@@ -273,6 +276,13 @@ function Clientes() {
               )}
             </tbody>
           </table>
+          {visibles < clientesFiltrados.length && (
+            <div className='ver-mas-contenedor'>
+              <button className='btn-ver-mas' onClick={() => setVisible(prev => prev + 10)}>
+                ver más ({clientesFiltrados.length - visibles} restantes)
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -33,7 +33,10 @@ function formatearFecha(fechaISO: string){
 function MisTurnos() {
   const [turnoDetalle, setTurnoDetalle] = useState<number | null>(null)
   const [turnos, setTurnos] = useState<Turno[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
+  const [busqueda, setBusqueda] = useState('');
+  const [visibles, setVisibles] = useState(10);
+
   useEffect(() => {
     async function cargarTurnos() {
       try{
@@ -58,6 +61,10 @@ function MisTurnos() {
   // Contadores calculados en base a los turnos reales, no hardcodeados
   const finalizados = turnos.filter((t) => t.estado === 'finalizado').length
   const asignados = turnos.filter((t) => t.estado === 'asignado' || t.estado === 'En proceso').length
+  const turnosFiltrados = turnos.filter((t) =>
+    t.cliente.toLocaleLowerCase().includes(busqueda.toLocaleLowerCase())
+  )
+  const turnosPaginados = turnosFiltrados.slice(0, visibles)
 
   if(loading){
     return <p className='seccion-titulo'>Cargando...</p>
@@ -90,6 +97,20 @@ function MisTurnos() {
       {/* TABLA SEMANAL */}
       <div className="mis-turnos-seccion">
         <p className="seccion-titulo">Turnos de la semana</p>
+         <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              type="text"
+              className="gestion-input"
+              placeholder="Buscar por cliente..."
+              value={busqueda}
+              onChange={(e) => { setBusqueda(e.target.value); setVisibles(10) }}
+            />
+            {busqueda && (
+              <button className="gestion-btn-cancelar" onClick={() => { setBusqueda(''); setVisibles(10) }}>
+                Limpiar
+              </button>
+            )}
+          </div>
         <div className="tabla-contenedor">
           <table className="tabla">
             <thead>
@@ -99,10 +120,10 @@ function MisTurnos() {
               </tr>
             </thead>
             <tbody>
-              {turnos.length === 0 ? (
-                <tr><td colSpan={6} className='sin-datos'>No tenes turnos esat semana...</td></tr>
+              {turnosFiltrados.length === 0 ? (
+                <tr><td colSpan={6} className='sin-datos'>No tenes turnos esta semana...</td></tr>
               ): (
-                turnos.map((t) => (
+                turnosPaginados.map((t) => (
                 <tr key={t.id} onClick={() => setTurnoDetalle(t.id)} style={{cursor: 'pointer'}}>
                   <td>{formatearFecha(t.fecha)}</td>
                   <td>{t.hora_carga ? new Date(t.hora_carga).toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'}) : '-'}</td>
@@ -117,6 +138,13 @@ function MisTurnos() {
               )}
             </tbody>
           </table>
+           {visibles < turnosFiltrados.length && (
+            <div className='ver-mas-contenedor'>
+              <button className='btn-ver-mas' onClick={() => setVisibles(prev => prev + 10)}>
+                ver más ({turnosFiltrados.length - visibles} restantes)
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

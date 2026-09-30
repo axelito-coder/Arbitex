@@ -30,6 +30,7 @@ function VehiculosFrecuentes() {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([])
   const [loading, setLoading] = useState(true)
   const [busqueda, setBusqueda] = useState('')
+  const [visibles, setVisibles] = useState(10)
 
   useEffect(() => {
     async function cargarVehiculos() {
@@ -67,6 +68,7 @@ function VehiculosFrecuentes() {
     )
   })
 
+  const vehiculosPaginados = vehiculosFiltrados.slice(0, visibles)
   //agrupamos las visitas por marca + modelo para el gráfico
   const porModelo = vehiculos.reduce((acc: Record<string, number>, v) => {
     const key = `${v.marca} ${v.modelo}`
@@ -118,7 +120,7 @@ function VehiculosFrecuentes() {
             className="filtro-select"
             placeholder='Patente, cliente o modelo'
             value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
+            onChange={(e) => {setBusqueda(e.target.value); setVisibles(10)}}
           />
         </div>
 
@@ -143,12 +145,12 @@ function VehiculosFrecuentes() {
               </tr>
             </thead>
             <tbody>
-              {vehiculosFiltrados.length === 0 ? (
+              {vehiculosPaginados.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="sin-datos">No hay vehículos para mostrar</td>
                 </tr>
               ) : (
-                vehiculosFiltrados.map((v) => (
+                vehiculosPaginados.map((v) => (
                   <tr key={v.patente}>
                     <td><span className='patente'>{v.patente}</span></td>
                     <td>{v.marca} {v.modelo}</td>
@@ -162,6 +164,14 @@ function VehiculosFrecuentes() {
               )}
             </tbody>
           </table>
+
+          {visibles < vehiculosFiltrados.length && (
+            <div className='ver-mas-contenedor'>
+              <button className='btn-ver-mas' onClick={() => setVisibles(prev => prev + 10)}>
+                ver más ({vehiculosFiltrados.length - visibles} restantes)
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
