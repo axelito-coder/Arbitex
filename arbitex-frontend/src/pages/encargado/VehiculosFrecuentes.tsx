@@ -25,12 +25,46 @@ function formatearFecha(fechaISO: string) { //para que la fecha se vea bien
   })
 }
 
+//cuantos dias pasaron desde una fecha, null si nunca vino
+function diasDesde(fechaISO: string) {
+  if (!fechaISO) return null
+  const ms = Date.now() - new Date(fechaISO).getTime()
+  return Math.floor(ms / (1000 * 60 * 60 * 24))
+}
+
+function cumpleVisitas(visitas: number, filtro: string) {
+  if (!filtro) return true
+  if (filtro === 'sin') return visitas === 0
+  if (filtro === '1-2') return visitas >= 1 && visitas <= 2
+  if (filtro === '3-5') return visitas >= 3 && visitas <= 5
+  if (filtro === '6+')  return visitas >= 6
+  return true
+}
+
+function cumpleService(fechaISO: string, filtro: string) {
+  if (!filtro) return true
+  const dias = diasDesde(fechaISO)
+  if (filtro === 'nunca') return dias === null
+  if (dias === null) return false
+  if (filtro === '30d') return dias <= 30
+  if (filtro === '3m')  return dias <= 90
+  if (filtro === '6m')  return dias <= 180
+  if (filtro === '+1a') return dias > 365
+  return true
+}
+
 function VehiculosFrecuentes() {
 
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([])
   const [loading, setLoading] = useState(true)
   const [busqueda, setBusqueda] = useState('')
   const [visibles, setVisibles] = useState(10)
+
+  const [filtroMarca, setFiltroMarca]     = useState('')
+  const [filtroModelo, setFiltroModelo]   = useState('')
+  const [filtroVisitas, setFiltroVisitas] = useState('')
+  const [filtroService, setFiltroService] = useState('')
+  const [orden, setOrden]                 = useState('visitas')
 
   useEffect(() => {
     async function cargarVehiculos() {
@@ -57,20 +91,46 @@ function VehiculosFrecuentes() {
     return <p className='seccion-titulo'>Cargando...</p>
   }
 
+  //las opciones de marca salen de los propios datos
+  const marcas = [...new Set(vehiculos.map(v => v.marca).filter(Boolean))].sort()
+
+  //los modelos dependen de la marca elegida
+  const modelos = [...new Set(
+    vehiculos
+      .filter(v => !filtroMarca || v.marca === filtroMarca)
+      .map(v => v.modelo)
+      .filter(Boolean)
+  )].sort()
+
   //filtro por patente, cliente, marca o modelo
-  const vehiculosFiltrados = vehiculos.filter((v) => {
-    if (!busqueda) return true
-    const texto = busqueda.toLowerCase()
-    return (
-      v.patente?.toLowerCase().includes(texto) ||
-      v.cliente?.toLowerCase().includes(texto) ||
-      `${v.marca} ${v.modelo}`.toLowerCase().includes(texto)
-    )
-  })
+  const vehiculosFiltrados = vehiculos
+    .filter((v) => {
+      if (!busqueda) return true
+      const texto = busqueda.toLowerCase()
+      return (
+        v.patente?.toLowerCase().includes(texto) ||
+        v.cliente?.toLowerCase().includes(texto) ||
+        `${v.marca} ${v.modelo}`.toLowerCase().includes(texto)
+      )
+    })
+    .filter((v) => !filtroMarca || v.marca === filtroMarca)
+    .filter((v) => !filtroModelo || v.modelo === filtroModelo)
+    .filter((v) => cumpleVisitas(Number(v.visitas), filtroVisitas))
+    .filter((v) => cumpleService(v.ultimo_service, filtroService))
+    .sort((a, b) => {
+      if (orden === 'patente')   return a.patente.localeCompare(b.patente, 'es')
+      if (orden === 'facturado') return Number(b.total_facturado) - Number(a.total_facturado)
+      if (orden === 'service') {
+        const fa = a.ultimo_service ? new Date(a.ultimo_service).getTime() : 0
+        const fb = b.ultimo_service ? new Date(b.ultimo_service).getTime() : 0
+        return fb - fa
+      }
+      return Number(b.visitas) - Number(a.visitas)
+    })
 
   const vehiculosPaginados = vehiculosFiltrados.slice(0, visibles)
   //agrupamos las visitas por marca + modelo para el gráfico
-  const porModelo = vehiculos.reduce((acc: Record<string, number>, v) => {
+  const porModelo = vehiculosFiltrados.reduce((acc: Record<string, number>, v) => {
     const key = `${v.marca} ${v.modelo}`
     acc[key] = (acc[key] || 0) + Number(v.visitas)
     return acc
@@ -82,8 +142,18 @@ function VehiculosFrecuentes() {
     .slice(0, 10)
 
   //métricas de arriba
-  const totalVisitas = vehiculos.reduce((acc, v) => acc + Number(v.visitas), 0)
-  const totalFacturado = vehiculos.reduce((acc, v) => acc + Number(v.total_facturado), 0)
+  const totalVisitas = vehiculosFiltrados.reduce((acc, v) => acc + Number(v.visitas), 0)
+  const totalFacturado = vehiculosFiltrados.reduce((acc, v) => acc + Number(v.total_facturado), 0)
+
+  function limpiarFiltros() {
+    setBusqueda('')
+    setFiltroMarca('')
+    setFiltroModelo('')
+    setFiltroVisitas('')
+    setFiltroService('')
+    setOrden('visitas')
+    setVisibles(10)
+  }
 
   return (
     <div className="vehiculos">
@@ -96,7 +166,7 @@ function VehiculosFrecuentes() {
         <div className='resumen-datos'>
           <div>
             <p className='detalle-label'>Vehículos registrados</p>
-            <p className='asesor-valor'>{vehiculos.length}</p>
+            <p className='asesor-valor'>{vehiculosFiltrados.length}</p>
           </div>
 
           <div>
@@ -112,7 +182,7 @@ function VehiculosFrecuentes() {
 
       </div>
 
-      {/* BUSCADOR */}
+      {/* FILTROS */}
       <div className="vehiculos-filtros">
         <div className="filtro-campo">
           <label className="filtro-label">Buscar</label>
@@ -124,7 +194,76 @@ function VehiculosFrecuentes() {
           />
         </div>
 
-        <button className="filtro-limpiar" onClick={() => setBusqueda('')}>
+        <div className="filtro-campo">
+          <label className="filtro-label">Marca</label>
+          <select
+            className="filtro-select"
+            value={filtroMarca}
+            onChange={(e) => {setFiltroMarca(e.target.value); setFiltroModelo(''); setVisibles(10)}}
+          >
+            <option value="">Todas las marcas</option>
+            {marcas.map((m) => <option key={m}>{m}</option>)}
+          </select>
+        </div>
+
+        <div className="filtro-campo">
+          <label className="filtro-label">Modelo</label>
+          <select
+            className="filtro-select"
+            value={filtroModelo}
+            onChange={(e) => {setFiltroModelo(e.target.value); setVisibles(10)}}
+          >
+            <option value="">Todos los modelos</option>
+            {modelos.map((m) => <option key={m}>{m}</option>)}
+          </select>
+        </div>
+
+        <div className="filtro-campo">
+          <label className="filtro-label">Visitas</label>
+          <select
+            className="filtro-select"
+            value={filtroVisitas}
+            onChange={(e) => {setFiltroVisitas(e.target.value); setVisibles(10)}}
+          >
+            <option value="">Todas</option>
+            <option value="sin">Sin visitas</option>
+            <option value="1-2">1 a 2</option>
+            <option value="3-5">3 a 5</option>
+            <option value="6+">6 o más</option>
+          </select>
+        </div>
+
+        <div className="filtro-campo">
+          <label className="filtro-label">Último service</label>
+          <select
+            className="filtro-select"
+            value={filtroService}
+            onChange={(e) => {setFiltroService(e.target.value); setVisibles(10)}}
+          >
+            <option value="">Todos</option>
+            <option value="30d">Últimos 30 días</option>
+            <option value="3m">Últimos 3 meses</option>
+            <option value="6m">Últimos 6 meses</option>
+            <option value="+1a">Hace más de un año</option>
+            <option value="nunca">Nunca vino</option>
+          </select>
+        </div>
+
+        <div className="filtro-campo">
+          <label className="filtro-label">Ordenar por</label>
+          <select
+            className="filtro-select"
+            value={orden}
+            onChange={(e) => {setOrden(e.target.value); setVisibles(10)}}
+          >
+            <option value="visitas">Visitas</option>
+            <option value="facturado">Total facturado</option>
+            <option value="service">Último service</option>
+            <option value="patente">Patente (A-Z)</option>
+          </select>
+        </div>
+
+        <button className="filtro-limpiar" onClick={limpiarFiltros}>
           Limpiar
         </button>
       </div>
@@ -178,6 +317,9 @@ function VehiculosFrecuentes() {
       {/* GRÁFICO */}
       <div className='vehiculos-grafico'>
         <p className='seccion-titulo'>Modelos más frecuentes</p>
+        {datosGrafico.length === 0 ? (
+          <p className='sin-datos'>No hay vehículos que coincidan con los filtros</p>
+        ) : (
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={datosGrafico}>
             <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false} />
@@ -191,6 +333,7 @@ function VehiculosFrecuentes() {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        )}
       </div>
 
     </div>

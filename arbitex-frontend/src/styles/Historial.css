@@ -6,10 +6,10 @@
 
 /* FILTROS */
 .historial-filtros {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
   display: flex;
   gap: 16px;
   align-items: flex-end;
@@ -25,43 +25,43 @@
 .filtro-label {
   font-size: 12px;
   font-weight: 500;
-  color: #595959;
+  color: var(--texto-suave);
 }
 
 .filtro-select {
   padding: 8px 12px;
-  border: 1px solid #E0E0E0;
+  border: 1px solid var(--borde);
   border-radius: 6px;
   font-size: 14px;
-  color: #1A1A1A;
+  color: var(--texto);
   outline: none;
-  background: #FFFFFF;
+  background: var(--superficie);
 }
 
 .filtro-select:focus {
-  border-color: #1A1A1A;
+  border-color: var(--texto);
 }
 
 .filtro-limpiar {
   padding: 8px 16px;
-  background: #E0E0E0;
+  background: var(--borde);
   border: none;
   border-radius: 6px;
   font-size: 14px;
-  color: #1A1A1A;
+  color: var(--texto);
   cursor: pointer;
 }
 
 .filtro-limpiar:hover {
-  background: #d0d0d0;
+  background: var(--gris-fuerte);
 }
 
 /* TABLA */
 .historial-tabla {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
 }
 
 .tabla-contenedor {
@@ -77,16 +77,16 @@
 .tabla th {
   text-align: left;
   padding: 10px 12px;
-  border-bottom: 2px solid #E0E0E0;
-  color: #595959;
+  border-bottom: 2px solid var(--borde);
+  color: var(--texto-suave);
   font-weight: 500;
   white-space: nowrap;
 }
 
 .tabla td {
   padding: 12px;
-  border-bottom: 1px solid #E0E0E0;
-  color: #1A1A1A;
+  border-bottom: 1px solid var(--borde);
+  color: var(--texto);
   white-space: nowrap;
 }
 
@@ -96,7 +96,7 @@
 
 .sin-datos {
   text-align: center;
-  color: #595959;
+  color: var(--texto-suave);
   padding: 32px;
 }
 
@@ -108,12 +108,12 @@
   font-weight: 500;
 }
 
-.badge-verde      { background: #D1FAE5; color: #065F46; }
-.badge-azul       { background: #DBEAFE; color: #1E40AF; }
-.badge-naranja    { background: #FEF3C7; color: #92400E; }
-.badge-rojo       { background: #FEE2E2; color: #991B1B; }
-.badge-gris       { background: #E0E0E0; color: #595959; }
-.badge-gris-oscuro{ background: #d0d0d0; color: #1A1A1A; }
+.badge-verde      { background: var(--badge-verde-fondo); color: var(--badge-verde-texto); }
+.badge-azul       { background: var(--badge-azul-fondo); color: var(--badge-azul-texto); }
+.badge-naranja    { background: var(--badge-ambar-fondo); color: var(--badge-ambar-texto); }
+.badge-rojo       { background: var(--badge-rojo-fondo); color: var(--badge-rojo-texto); }
+.badge-gris       { background: var(--badge-gris-fondo); color: var(--badge-gris-texto); }
+.badge-gris-oscuro{ background: var(--gris-fuerte); color: var(--texto); }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {

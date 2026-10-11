@@ -11,37 +11,37 @@
 }
 
 .tarjeta {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 20px;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
 }
 
 .tarjeta-valor {
   font-family: 'Rajdhani', sans-serif;
   font-size: 32px;
   font-weight: 700;
-  color: #EB0A1E;
+  color: var(--acento-texto);
 }
 
 .tarjeta-label {
   font-size: 13px;
-  color: #595959;
+  color: var(--texto-suave);
   margin-top: 4px;
 }
 
 .mis-turnos-seccion {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
 }
 
 .seccion-titulo {
   font-size: 13px;
   font-weight: 500;
-  color: #595959;
+  color: var(--texto-suave);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 16px;
@@ -60,16 +60,16 @@
 .tabla th {
   text-align: left;
   padding: 10px 12px;
-  border-bottom: 2px solid #E0E0E0;
-  color: #595959;
+  border-bottom: 2px solid var(--borde);
+  color: var(--texto-suave);
   font-weight: 500;
   white-space: nowrap;
 }
 
 .tabla td {
   padding: 12px;
-  border-bottom: 1px solid #E0E0E0;
-  color: #1A1A1A;
+  border-bottom: 1px solid var(--borde);
+  color: var(--texto);
 }
 
 .tabla tr:last-child td {
@@ -84,12 +84,12 @@
   white-space: nowrap;
 }
 
-.badge-verde       { background: #D1FAE5; color: #065F46; }
-.badge-azul        { background: #DBEAFE; color: #1E40AF; }
-.badge-naranja     { background: #FEF3C7; color: #92400E; }
-.badge-gris        { background: #E0E0E0; color: #595959; }
-.badge-gris-oscuro { background: #E0E0E0; color: #1A1A1A; }
-.badge-rojo        { background: #FCE1E3; color: #EB0A1E; }
+.badge-verde       { background: var(--badge-verde-fondo); color: var(--badge-verde-texto); }
+.badge-azul        { background: var(--badge-azul-fondo); color: var(--badge-azul-texto); }
+.badge-naranja     { background: var(--badge-ambar-fondo); color: var(--badge-ambar-texto); }
+.badge-gris        { background: var(--badge-gris-fondo); color: var(--badge-gris-texto); }
+.badge-gris-oscuro { background: var(--badge-gris-fondo); color: var(--texto); }
+.badge-rojo        { background: var(--badge-rojo-fondo); color: var(--acento-texto); }
 
 @media (max-width: 768px) {
   .mis-turnos-tarjetas { grid-template-columns: 1fr; }

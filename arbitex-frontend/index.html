@@ -8,6 +8,9 @@
     <title>Arbitex</title>
   </head>
   <body>
+    <script>
+      document.documentElement.setAttribute('data-tema', localStorage.getItem('tema') || 'claro')
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

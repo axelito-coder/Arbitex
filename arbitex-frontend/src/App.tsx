@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Sidebar from './components/Sidebar'
 import Navbar from './components/Navbar'
 import Dashboard from './pages/encargado/Dashboard'
@@ -20,6 +20,12 @@ function App() {
   const [pagina, setPagina]   = useState(
     localStorage.getItem('rol') === 'encargado' ? 'dashboard' : 'inicio'
   )
+  const [tema, setTema]       = useState(localStorage.getItem('tema') || 'claro')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-tema', tema)
+    localStorage.setItem('tema', tema)
+  }, [tema])
 
   if (!rol) {
     return (
@@ -40,7 +46,7 @@ function App() {
       </div>
 
       <div className="app-main">
-        <Navbar sidebar={sidebar} setSidebar={setSidebar} pagina={pagina} />
+        <Navbar sidebar={sidebar} setSidebar={setSidebar} pagina={pagina} tema={tema} setTema={setTema} />
         <div className="app-contenido">
           {pagina === 'dashboard' && <Dashboard />}
           {pagina === 'cargar'    && <CargarTurno />}

@@ -12,7 +12,7 @@
 
 .gestion-btn-nuevo {
   padding: 8px 16px;
-  background: #EB0A1E;
+  background: var(--acento);
   border: none;
   border-radius: 6px;
   font-size: 13px;
@@ -23,30 +23,30 @@
 
 .gestion-exito {
   padding: 10px 14px;
-  background: #D1FAE5;
+  background: var(--badge-verde-fondo);
   border-left: 4px solid #10B981;
   border-radius: 4px;
   font-size: 13px;
-  color: #065F46;
+  color: var(--badge-verde-texto);
 }
 
 .gestion-btn-editar {
   padding: 5px 12px;
   background: transparent;
-  border: 1px solid #E0E0E0;
+  border: 1px solid var(--borde);
   border-radius: 6px;
   font-size: 12px;
-  color: #595959;
+  color: var(--texto-suave);
   cursor: pointer;
 }
 
 .gestion-btn-desactivar {
   padding: 5px 12px;
   background: transparent;
-  border: 1px solid #EB0A1E;
+  border: 1px solid var(--acento-texto);
   border-radius: 6px;
   font-size: 12px;
-  color: #EB0A1E;
+  color: var(--acento-texto);
   cursor: pointer;
 }
 
@@ -57,28 +57,28 @@
 }
 
 .gestion-card {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 28px;
   width: 100%;
   max-width: 480px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
 }
 
 .gestion-titulo {
   font-size: 18px;
   font-weight: 600;
-  color: #1A1A1A;
+  color: var(--texto);
   margin-bottom: 20px;
 }
 
 .gestion-error {
   padding: 10px 14px;
-  background: #FEE2E2;
-  border-left: 4px solid #EB0A1E;
+  background: var(--badge-rojo-fondo);
+  border-left: 4px solid var(--acento-texto);
   border-radius: 4px;
   font-size: 13px;
-  color: #EB0A1E;
+  color: var(--acento-texto);
   margin-bottom: 16px;
 }
 
@@ -89,7 +89,7 @@
 .gestion-label {
   display: block;
   font-size: 12px;
-  color: #595959;
+  color: var(--texto-suave);
   margin-bottom: 6px;
   font-weight: 500;
 }
@@ -102,16 +102,17 @@
 .gestion-input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #E0E0E0;
+  border: 1px solid var(--borde);
   border-radius: 6px;
   font-size: 14px;
-  color: #1A1A1A;
+  color: var(--texto);
+  background: var(--superficie);
   box-sizing: border-box;
 }
 
 .gestion-input:focus {
   outline: none;
-  border-color: #EB0A1E;
+  border-color: var(--acento-texto);
 }
 
 .gestion-botones {
@@ -123,18 +124,18 @@
 .gestion-btn-cancelar {
   flex: 1;
   padding: 11px;
-  background: #F5F5F5;
+  background: var(--superficie-alt);
   border: none;
   border-radius: 6px;
   font-size: 14px;
-  color: #595959;
+  color: var(--texto-suave);
   cursor: pointer;
 }
 
 .gestion-btn-guardar {
   flex: 2;
   padding: 11px;
-  background: #EB0A1E;
+  background: var(--acento);
   border: none;
   border-radius: 6px;
   font-size: 14px;

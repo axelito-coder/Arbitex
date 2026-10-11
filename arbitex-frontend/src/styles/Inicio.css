@@ -8,22 +8,22 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 22px;
   font-weight: 700;
-  color: #1A1A1A;
+  color: var(--texto);
 }
 
 /* TURNO ACTUAL */
 .turno-actual {
-  background: #FFFFFF;
-  border-left: 4px solid #EB0A1E;
+  background: var(--superficie);
+  border-left: 4px solid var(--acento-texto);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
 }
 
 .turno-actual-label {
   font-size: 12px;
   font-weight: 500;
-  color: #EB0A1E;
+  color: var(--acento-texto);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 12px;
@@ -41,12 +41,12 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 20px;
   font-weight: 700;
-  color: #1A1A1A;
+  color: var(--texto);
 }
 
 .turno-actual-detalle {
   font-size: 14px;
-  color: #595959;
+  color: var(--texto-suave);
   margin-top: 2px;
 }
 
@@ -56,14 +56,14 @@
 
 .turno-actual-hora {
   font-size: 14px;
-  color: #595959;
+  color: var(--texto-suave);
 }
 
 .turno-actual-monto {
   font-family: 'Rajdhani', sans-serif;
   font-size: 20px;
   font-weight: 700;
-  color: #1A1A1A;
+  color: var(--texto);
 }
 
 .btn-iniciar {
@@ -79,34 +79,34 @@
 }
 
 .turno-espera {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 24px;
   text-align: center;
-  color: #595959;
+  color: var(--texto-suave);
   font-size: 14px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
 }
 
 /* SECCION TABLA */
 .inicio-seccion {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
 }
 
 .seccion-titulo {
   font-size: 13px;
   font-weight: 500;
-  color: #595959;
+  color: var(--texto-suave);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 16px;
 }
 
 .sin-datos {
-  color: #595959;
+  color: var(--texto-suave);
   font-size: 14px;
   text-align: center;
   padding: 20px 0;
@@ -125,16 +125,16 @@
 .tabla th {
   text-align: left;
   padding: 10px 12px;
-  border-bottom: 2px solid #E0E0E0;
-  color: #595959;
+  border-bottom: 2px solid var(--borde);
+  color: var(--texto-suave);
   font-weight: 500;
   white-space: nowrap;
 }
 
 .tabla td {
   padding: 12px;
-  border-bottom: 1px solid #E0E0E0;
-  color: #1A1A1A;
+  border-bottom: 1px solid var(--borde);
+  color: var(--texto);
 }
 
 .tabla tr:last-child td {
@@ -154,15 +154,15 @@
   white-space: nowrap;
 }
 
-.badge-verde   { background: #D1FAE5; color: #065F46; }
-.badge-azul    { background: #DBEAFE; color: #1E40AF; }
-.badge-naranja { background: #FEF3C7; color: #92400E; }
-.badge-gris    { background: #E0E0E0; color: #595959; }
+.badge-verde   { background: var(--badge-verde-fondo); color: var(--badge-verde-texto); }
+.badge-azul    { background: var(--badge-azul-fondo); color: var(--badge-azul-texto); }
+.badge-naranja { background: var(--badge-ambar-fondo); color: var(--badge-ambar-texto); }
+.badge-gris    { background: var(--badge-gris-fondo); color: var(--badge-gris-texto); }
 
 .btn-finalizar {
   flex: 2;
   padding: 12px;
-  background: #EB0A1E;
+  background: var(--acento);
   border: none;
   border-radius: 6px;
   font-size: 14px;

@@ -15,7 +15,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #EB0A1E;
+  background: var(--acento);
   color: #FFFFFF;
   display: flex;
   align-items: center;
@@ -30,12 +30,12 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: #1A1A1A;
+  color: var(--texto);
 }
 
 .perfil-rol {
   font-size: 13px;
-  color: #595959;
+  color: var(--texto-suave);
   margin-top: 2px;
 }
 
@@ -47,18 +47,18 @@
 }
 
 .tarjeta {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 20px;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
 }
 
 .tarjeta-valor {
   font-family: 'Rajdhani', sans-serif;
   font-size: 26px;
   font-weight: 700;
-  color: #EB0A1E;
+  color: var(--acento-texto);
 }
 
 .valor-alerta {
@@ -67,16 +67,16 @@
 
 .tarjeta-label {
   font-size: 12px;
-  color: #595959;
+  color: var(--texto-suave);
   margin-top: 4px;
 }
 
 /* SECCION GRAFICOS */
 .perfil-seccion {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
 }
 
 .grafico-botones {
@@ -86,8 +86,8 @@
 }
 
 .btn-grafico {
-  background: #F5F5F5;
-  color: #595959;
+  background: var(--superficie-alt);
+  color: var(--texto-suave);
   border: none;
   border-radius: 6px;
   padding: 8px 16px;
@@ -97,7 +97,7 @@
 }
 
 .btn-grafico.activo {
-  background: #EB0A1E;
+  background: var(--acento);
   color: #FFFFFF;
 }
 

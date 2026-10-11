@@ -1,11 +1,11 @@
 .navbar {
   height: 56px;
-  background: #FFFFFF;
+  background: var(--superficie);
   display: flex;
   align-items: center;
   padding: 0 24px;
   gap: 16px;
-  border-bottom: 1px solid #E0E0E0;
+  border-bottom: 1px solid var(--borde);
 }
 
 .navbar-boton {
@@ -13,13 +13,60 @@
   border: none;
   font-size: 20px;
   cursor: pointer;
-  color: #1A1A1A;
+  color: var(--texto);
 }
 
 .navbar-titulo {
   font-family: 'Rajdhani', sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: #1A1A1A;
+  color: var(--texto);
   text-transform: capitalize;
+}
+
+.navbar-tema {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--borde);
+  border-radius: 50%;
+  background: var(--superficie);
+  color: var(--texto-suave);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.navbar-tema:hover {
+  color: var(--acento-texto);
+  border-color: var(--acento-texto);
+  background: var(--superficie-alt);
+}
+
+.navbar-tema:active {
+  transform: scale(0.9);
+}
+
+.navbar-tema svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+/* al cambiar de tema el icono se vuelve a montar y reproduce la animacion */
+.navbar-tema-icono {
+  display: block;
+  animation: tema-entra 0.3s ease;
+}
+
+@keyframes tema-entra {
+  from { opacity: 0; transform: rotate(-120deg) scale(0.4); }
+  to   { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar-tema-icono { animation: none; }
 }

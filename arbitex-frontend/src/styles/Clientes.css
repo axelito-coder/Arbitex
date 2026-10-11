@@ -6,10 +6,10 @@
 
 /* FILTROS */
 .clientes-filtros {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
   display: flex;
   gap: 16px;
   align-items: flex-end;
@@ -18,22 +18,22 @@
 
 /* TABLA */
 .clientes-tabla {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
 }
 
 .clientes-tabla .tabla tbody tr:hover {
-  background: #F5F5F5;
+  background: var(--superficie-alt);
 }
 
 /* DETALLE */
 .cliente-detalle-header {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -43,7 +43,7 @@
 .cliente-nombre {
   font-size: 22px;
   font-weight: 600;
-  color: #1A1A1A;
+  color: var(--texto);
   margin: 4px 0 0 0;
 }
 

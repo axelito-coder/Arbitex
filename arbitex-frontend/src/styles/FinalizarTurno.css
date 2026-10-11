@@ -5,34 +5,34 @@
 }
 
 .finalizar-card {
-  background: #FFFFFF;
+  background: var(--superficie);
   border-radius: 8px;
   padding: 28px;
   width: 100%;
   max-width: 560px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--sombra);
 }
 
 .finalizar-titulo {
   font-size: 18px;
   font-weight: 600;
-  color: #1A1A1A;
+  color: var(--texto);
   margin-bottom: 4px;
 }
 
 .finalizar-subtitulo {
   font-size: 13px;
-  color: #595959;
+  color: var(--texto-suave);
   margin-bottom: 20px;
 }
 
 .finalizar-error {
-  background: #FEE2E2;
-  border-left: 4px solid #EB0A1E;
+  background: var(--badge-rojo-fondo);
+  border-left: 4px solid var(--acento-texto);
   padding: 10px 14px;
   border-radius: 4px;
   font-size: 13px;
-  color: #EB0A1E;
+  color: var(--acento-texto);
   margin-bottom: 16px;
 }
 
@@ -44,7 +44,7 @@
 }
 
 .finalizar-item {
-  background: #F5F5F5;
+  background: var(--superficie-alt);
   border-radius: 8px;
   padding: 14px;
   display: flex;
@@ -61,30 +61,32 @@
 .item-tipo {
   flex: 1;
   padding: 8px 10px;
-  border: 1px solid #E0E0E0;
+  border: 1px solid var(--borde);
   border-radius: 6px;
   font-size: 13px;
-  background: #FFFFFF;
-  color: #1A1A1A;
+  background: var(--superficie);
+  color: var(--texto);
 }
 
 .item-eliminar {
   padding: 6px 10px;
   background: none;
-  border: 1px solid #E0E0E0;
+  border: 1px solid var(--borde);
   border-radius: 6px;
   cursor: pointer;
-  color: #595959;
+  color: var(--texto-suave);
   font-size: 12px;
 }
 
 .item-input {
   width: 100%;
   padding: 8px 10px;
-  border: 1px solid #E0E0E0;
+  border: 1px solid var(--borde);
   border-radius: 6px;
   font-size: 13px;
   box-sizing: border-box;
+  background: var(--superficie);
+  color: var(--texto);
 }
 
 .item-numero {
@@ -95,17 +97,17 @@
   width: 100%;
   padding: 10px;
   background: none;
-  border: 1px dashed #E0E0E0;
+  border: 1px dashed var(--borde);
   border-radius: 6px;
   font-size: 13px;
-  color: #595959;
+  color: var(--texto-suave);
   cursor: pointer;
   margin-bottom: 20px;
 }
 
 .finalizar-agregar:hover {
-  border-color: #EB0A1E;
-  color: #EB0A1E;
+  border-color: var(--acento-texto);
+  color: var(--acento-texto);
 }
 
 .finalizar-total {
@@ -113,9 +115,9 @@
   justify-content: space-between;
   font-size: 16px;
   font-weight: 600;
-  color: #1A1A1A;
+  color: var(--texto);
   padding: 14px 0;
-  border-top: 1px solid #E0E0E0;
+  border-top: 1px solid var(--borde);
   margin-bottom: 20px;
 }
 
@@ -127,18 +129,18 @@
 .finalizar-btn-cancelar {
   flex: 1;
   padding: 12px;
-  background: #F5F5F5;
+  background: var(--superficie-alt);
   border: none;
   border-radius: 6px;
   font-size: 14px;
   cursor: pointer;
-  color: #595959;
+  color: var(--texto-suave);
 }
 
 .finalizar-btn-confirmar {
   flex: 2;
   padding: 12px;
-  background: #EB0A1E;
+  background: var(--acento);
   border: none;
   border-radius: 6px;
   font-size: 14px;
