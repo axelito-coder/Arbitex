@@ -68,7 +68,7 @@ async function  aplicarCompensacionSemanal(): Promise<void> {
 
     const result = await pool.query(`
         SELECT id FROM empleados
-        ORDER BY acumulado_semana_anterior ASC
+        ORDER BY acumulado_semana_anterior DESC
     `)
 
     for (let i = 0; i < result.rows.length; i++){
