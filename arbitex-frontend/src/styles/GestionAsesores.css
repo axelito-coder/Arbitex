@@ -143,3 +143,8 @@
   color: #FFFFFF;
   cursor: pointer;
 }
+@media (max-width: 480px) {
+  .gestion-card { padding: 18px; }
+  .gestion-botones { flex-direction: column; }
+  .gestion-header { flex-direction: column; align-items: stretch; gap: 12px; }
+}

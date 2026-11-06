@@ -153,3 +153,8 @@
   background: rgba(235,10,30,0.5);
   cursor: not-allowed;
 }
+@media (max-width: 480px) {
+  .finalizar-contenedor { padding: 0; }
+  .finalizar-card { padding: 18px; }
+  .finalizar-botones { flex-direction: column; }
+}

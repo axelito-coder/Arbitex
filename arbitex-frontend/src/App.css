@@ -6,6 +6,7 @@
 .app-sidebar {
   height: 100%;
   overflow: hidden;
+  flex-shrink: 0; /* si no, el contenido lo aplasta hasta 0 en pantallas chicas */
   transition: width 0.3s ease;
 }
 
@@ -19,6 +20,7 @@
 
 .app-main {
   flex: 1;
+  min-width: 0; /* deja que se achique: sin esto el overflow de las tablas no funciona */
   display: flex;
   flex-direction: column;
 }
@@ -28,4 +30,51 @@
   overflow-y: auto;
   padding: 24px;
   background: var(--fondo);
+}
+
+/* fondo que tapa el contenido cuando el menu esta abierto, solo en mobile */
+.app-backdrop {
+  display: none;
+}
+
+/* ---------- MOBILE: el menu pasa a ser un panel que se desliza encima ---------- */
+@media (max-width: 768px) {
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 240px;
+    z-index: 20;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+  }
+
+  .app-sidebar.abierto {
+    width: 240px;
+    transform: translateX(0);
+  }
+
+  .app-sidebar.cerrado {
+    width: 240px;
+    transform: translateX(-100%);
+  }
+
+  .app-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .app-contenido {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-contenido {
+    padding: 12px;
+  }
 }

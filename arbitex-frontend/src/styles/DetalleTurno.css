@@ -130,3 +130,7 @@
     width: 100%;
   }
 }
+@media (max-width: 480px) {
+  .detalle-card { padding: 18px; }
+  .detalle-nombre { font-size: 22px; letter-spacing: 2px; }
+}

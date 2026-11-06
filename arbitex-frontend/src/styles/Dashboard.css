@@ -112,7 +112,18 @@
 }
 
 @media (max-width: 480px) {
+  /* 2 columnas y no 1: son solo un numero y una etiqueta, en 1 columna
+     quedan 5 tarjetas enormes y hay que scrollear muchisimo */
   .dashboard-tarjetas {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .tarjeta {
+    padding: 14px;
+  }
+
+  .tarjeta-valor {
+    font-size: 28px;
   }
 }

@@ -37,6 +37,11 @@
   flex-wrap: wrap;
 }
 
+/* la tabla scrollea sola de costado en vez de estirar la pagina */
+.tabla-contenedor {
+  overflow-x: auto;
+}
+
 /* TABLA */
 .vehiculos-tabla {
   background: var(--superficie);

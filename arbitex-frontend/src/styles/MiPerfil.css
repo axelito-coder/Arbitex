@@ -106,5 +106,7 @@
 }
 
 @media (max-width: 480px) {
-  .perfil-tarjetas { grid-template-columns: 1fr; }
+  .perfil-tarjetas { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .tarjeta { padding: 14px; }
+  .grafico-botones { flex-wrap: wrap; }
 }

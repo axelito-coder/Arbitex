@@ -28,6 +28,11 @@
   background: var(--superficie-alt);
 }
 
+/* la tabla scrollea sola de costado en vez de estirar la pagina */
+.tabla-contenedor {
+  overflow-x: auto;
+}
+
 /* DETALLE */
 .cliente-detalle-header {
   background: var(--superficie);

@@ -14,8 +14,14 @@ import GestionAsesores from './pages/encargado/GestionAsesores'
 import VehiculosFrecuentes from './pages/encargado/VehiculosFrecuentes'
 import Clientes from './pages/encargado/Clientes'
 
+//mismo corte que el @media de App.css
+function esPantallaChica() {
+  return window.innerWidth <= 768
+}
+
 function App() {
-  const [sidebar, setSidebar] = useState(true)
+  //en el telefono el menu tapa el contenido, asi que arranca cerrado
+  const [sidebar, setSidebar] = useState(() => !esPantallaChica())
   const [rol, setRol]         = useState(localStorage.getItem('rol') || '')
   const [pagina, setPagina]   = useState(
     localStorage.getItem('rol') === 'encargado' ? 'dashboard' : 'inicio'
@@ -38,12 +44,20 @@ function App() {
     )
   }
 
+  //al elegir una pagina el menu se cierra solo, si no queda tapando el contenido
+  function irA(destino: string) {
+    setPagina(destino)
+    if (esPantallaChica()) setSidebar(false)
+  }
+
   return (
     <div className="app-contenedor">
 
       <div className={`app-sidebar ${sidebar ? 'abierto' : 'cerrado'}`}>
-        <Sidebar pagina={pagina} setPagina={setPagina} rol={rol} />
+        <Sidebar pagina={pagina} setPagina={irA} rol={rol} />
       </div>
+
+      {sidebar && <div className="app-backdrop" onClick={() => setSidebar(false)} />}
 
       <div className="app-main">
         <Navbar sidebar={sidebar} setSidebar={setSidebar} pagina={pagina} tema={tema} setTema={setTema} />
