@@ -15,6 +15,11 @@ function Sidebar({ pagina, setPagina, rol,}: Props) {
     { id: 'perfil',   label: 'Mi Perfil' },
   ]
 
+  const linkRecepcionista = [
+    {id: 'dashboard', label: 'Dashboard'},
+    {id: 'cargar', label: 'Cargar Turno'},
+  ]
+
   const linksEncargado = [
     { id: 'dashboard', label: 'Dashboard'      },
     { id: 'cargar',    label: 'Cargar Turno'   },
@@ -25,7 +30,16 @@ function Sidebar({ pagina, setPagina, rol,}: Props) {
     { id: 'clientes', label: 'Clientes' }
   ]
 
-  const links = rol === 'encargado' ? linksEncargado : linksAsesor
+  function getLinks(){
+    if(rol === 'encargado') return linksEncargado
+    if(rol === 'recepcionista') return linkRecepcionista
+    return linksAsesor
+  }
+  function getRolLabel(){
+    if(rol === 'encargado') return 'Encargado'
+    if(rol === 'recepcionista') return 'Recepcionista'
+    return 'Asesor'
+  }
 
    function cerrarSesion() {
     localStorage.removeItem('token')
@@ -39,7 +53,7 @@ function Sidebar({ pagina, setPagina, rol,}: Props) {
 
       <div className="sidebar-logo">ARBITEX</div>
 
-      {links.map((item) => (
+      {getLinks().map((item) => (
         <div
           key={item.id}
           onClick={() => setPagina(item.id)}
@@ -51,7 +65,7 @@ function Sidebar({ pagina, setPagina, rol,}: Props) {
 
        <div className="sidebar-footer">
         <p className="sidebar-nombre">{nombre}</p>
-        <p className="sidebar-rol-label">{rol === 'encargado' ? 'Encargado' : 'Asesor'}</p>
+        <p className="sidebar-rol-label">{getRolLabel()}</p>
         <button className="btn-cerrar-sesion" onClick={cerrarSesion}>
           Cerrar sesión
         </button>

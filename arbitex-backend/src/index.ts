@@ -5,7 +5,7 @@ dotenv.config()
 import pool from './db'
 import authRoutes from './routes/authRoutes'
 import asesorRoutes from './routes/asesorRoutes'
-import encargadoRoutes from './routes/encargadoRoutes'
+import {encargadoRouter, recepcionRouter} from './routes/encargadoRoutes'
 import './cron/jobs'
 
 const app = express()
@@ -16,7 +16,8 @@ app.use(express.json())
 
 app.use('/auth', authRoutes)
 app.use('/asesor', asesorRoutes)
-app.use('/encargado', encargadoRoutes)
+app.use('/encargado', recepcionRouter) //recepcionista + encargado
+app.use('/encargado', encargadoRouter) //solo encargado
 
 app.get('/', (req, res) => {
     res.json({ mensaje: 'Servidor Arbitex funcionando'})

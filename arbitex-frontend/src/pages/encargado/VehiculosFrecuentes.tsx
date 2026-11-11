@@ -37,7 +37,7 @@ function cumpleVisitas(visitas: number, filtro: string) {
   if (filtro === 'sin') return visitas === 0
   if (filtro === '1-2') return visitas >= 1 && visitas <= 2
   if (filtro === '3-5') return visitas >= 3 && visitas <= 5
-  if (filtro === '6+')  return visitas >= 6
+  if (filtro === '6+') return visitas >= 6
   return true
 }
 
@@ -47,8 +47,8 @@ function cumpleService(fechaISO: string, filtro: string) {
   if (filtro === 'nunca') return dias === null
   if (dias === null) return false
   if (filtro === '30d') return dias <= 30
-  if (filtro === '3m')  return dias <= 90
-  if (filtro === '6m')  return dias <= 180
+  if (filtro === '3m') return dias <= 90
+  if (filtro === '6m') return dias <= 180
   if (filtro === '+1a') return dias > 365
   return true
 }
@@ -59,12 +59,21 @@ function VehiculosFrecuentes() {
   const [loading, setLoading] = useState(true)
   const [busqueda, setBusqueda] = useState('')
   const [visibles, setVisibles] = useState(10)
+  const [graficoActivo, setGraficoActivo] = useState<'visitas' | 'facturado'>('visitas') //para cambiar el gráfico
 
-  const [filtroMarca, setFiltroMarca]     = useState('')
-  const [filtroModelo, setFiltroModelo]   = useState('')
+  const [filtroMarca, setFiltroMarca] = useState('')
+  const [filtroModelo, setFiltroModelo] = useState('')
   const [filtroVisitas, setFiltroVisitas] = useState('')
   const [filtroService, setFiltroService] = useState('')
-  const [orden, setOrden]                 = useState('visitas')
+  const [orden, setOrden] = useState('visitas')
+  const [esMobile, setEsMobile] = useState(window.innerWidth < 768)
+
+  //para diferenciar si es mobile 
+  useEffect(() => {
+    const handler = () => setEsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
   useEffect(() => {
     async function cargarVehiculos() {
@@ -118,7 +127,7 @@ function VehiculosFrecuentes() {
     .filter((v) => cumpleVisitas(Number(v.visitas), filtroVisitas))
     .filter((v) => cumpleService(v.ultimo_service, filtroService))
     .sort((a, b) => {
-      if (orden === 'patente')   return a.patente.localeCompare(b.patente, 'es')
+      if (orden === 'patente') return a.patente.localeCompare(b.patente, 'es')
       if (orden === 'facturado') return Number(b.total_facturado) - Number(a.total_facturado)
       if (orden === 'service') {
         const fa = a.ultimo_service ? new Date(a.ultimo_service).getTime() : 0
@@ -139,7 +148,18 @@ function VehiculosFrecuentes() {
   const datosGrafico = Object.entries(porModelo)
     .map(([nombre, visitas]) => ({ nombre, visitas }))
     .sort((a, b) => b.visitas - a.visitas)
-    .slice(0, 10)
+    .slice(0, 5)
+
+  const datosGraficoFacturado = Object.entries(
+    vehiculosFiltrados.reduce((acc: Record<string, number>, v) => {
+      const key = `${v.marca} ${v.modelo}`
+      acc[key] = (acc[key] || 0) + Number(v.total_facturado)
+      return acc
+    }, {})
+  )
+    .map(([nombre, facturado]) => ({ nombre, facturado }))
+    .sort((a, b) => b.facturado - a.facturado)
+    .slice(0, 5)
 
   //métricas de arriba
   const totalVisitas = vehiculosFiltrados.reduce((acc, v) => acc + Number(v.visitas), 0)
@@ -190,7 +210,7 @@ function VehiculosFrecuentes() {
             className="filtro-select"
             placeholder='Patente, cliente o modelo'
             value={busqueda}
-            onChange={(e) => {setBusqueda(e.target.value); setVisibles(10)}}
+            onChange={(e) => { setBusqueda(e.target.value); setVisibles(10) }}
           />
         </div>
 
@@ -199,7 +219,7 @@ function VehiculosFrecuentes() {
           <select
             className="filtro-select"
             value={filtroMarca}
-            onChange={(e) => {setFiltroMarca(e.target.value); setFiltroModelo(''); setVisibles(10)}}
+            onChange={(e) => { setFiltroMarca(e.target.value); setFiltroModelo(''); setVisibles(10) }}
           >
             <option value="">Todas las marcas</option>
             {marcas.map((m) => <option key={m}>{m}</option>)}
@@ -211,7 +231,7 @@ function VehiculosFrecuentes() {
           <select
             className="filtro-select"
             value={filtroModelo}
-            onChange={(e) => {setFiltroModelo(e.target.value); setVisibles(10)}}
+            onChange={(e) => { setFiltroModelo(e.target.value); setVisibles(10) }}
           >
             <option value="">Todos los modelos</option>
             {modelos.map((m) => <option key={m}>{m}</option>)}
@@ -223,7 +243,7 @@ function VehiculosFrecuentes() {
           <select
             className="filtro-select"
             value={filtroVisitas}
-            onChange={(e) => {setFiltroVisitas(e.target.value); setVisibles(10)}}
+            onChange={(e) => { setFiltroVisitas(e.target.value); setVisibles(10) }}
           >
             <option value="">Todas</option>
             <option value="sin">Sin visitas</option>
@@ -238,7 +258,7 @@ function VehiculosFrecuentes() {
           <select
             className="filtro-select"
             value={filtroService}
-            onChange={(e) => {setFiltroService(e.target.value); setVisibles(10)}}
+            onChange={(e) => { setFiltroService(e.target.value); setVisibles(10) }}
           >
             <option value="">Todos</option>
             <option value="30d">Últimos 30 días</option>
@@ -254,7 +274,7 @@ function VehiculosFrecuentes() {
           <select
             className="filtro-select"
             value={orden}
-            onChange={(e) => {setOrden(e.target.value); setVisibles(10)}}
+            onChange={(e) => { setOrden(e.target.value); setVisibles(10) }}
           >
             <option value="visitas">Visitas</option>
             <option value="facturado">Total facturado</option>
@@ -316,23 +336,50 @@ function VehiculosFrecuentes() {
 
       {/* GRÁFICO */}
       <div className='vehiculos-grafico'>
-        <p className='seccion-titulo'>Modelos más frecuentes</p>
-        {datosGrafico.length === 0 ? (
-          <p className='sin-datos'>No hay vehículos que coincidan con los filtros</p>
+        <div className='grafico-botones'>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            <button
+              className={`btn-grafico ${graficoActivo === 'visitas' ? 'activo' : ''}`}
+              onClick={() => setGraficoActivo('visitas')}
+            >
+              Visitas
+            </button>
+            <button
+              className={`btn-grafico ${graficoActivo === 'facturado' ? 'activo' : ''}`}
+              onClick={() => setGraficoActivo('facturado')}
+            >
+              Facturado
+            </button>
+          </div>
+        </div>
+        <p className='seccion-titulo'>
+          {graficoActivo === 'visitas' ? 'Modelos más frecuentes' : 'Modelos que más generan'}
+        </p>
+
+        {graficoActivo === 'visitas' ? (
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={datosGrafico} margin={{ bottom: esMobile ? 0 : 40 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false} />
+              <XAxis dataKey="nombre" hide={esMobile} tick={{ fontSize: 11, fill: '#595959' }} axisLine={false} tickLine={false} interval={0} />
+              <YAxis hide />
+              <Tooltip labelFormatter={(label) => `${label}`} formatter={(value) => [`${value} visitas`, 'Visitas']} />
+              <Bar dataKey="visitas" name="Visitas" radius={[4, 4, 0, 0]}>
+                {datosGrafico.map((_, i) => <Cell key={i} fill="#EB0A1E" />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         ) : (
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={datosGrafico}>
-            <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false} />
-            <XAxis dataKey="nombre" tick={{ fontSize: 12, fill: '#595959' }} axisLine={false} tickLine={false} />
-            <YAxis hide />
-            <Tooltip formatter={(value) => [`${value} visitas`, 'Visitas']} />
-            <Bar dataKey="visitas" name="Visitas" radius={[4, 4, 0, 0]}>
-              {datosGrafico.map((_, i) => (
-                <Cell key={i} fill="#EB0A1E" />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={datosGraficoFacturado} margin={{ bottom: esMobile ? 0 : 40 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false} />
+              <XAxis dataKey="nombre" hide={esMobile} tick={{ fontSize: 11, fill: '#595959' }} axisLine={false} tickLine={false} interval={0} />
+              <YAxis hide />
+              <Tooltip labelFormatter={(label) => `${label}`} formatter={(value) => [`$${Number(value).toLocaleString('es-AR')}`, 'Facturado']} />
+              <Bar dataKey="facturado" name="Facturado" radius={[4, 4, 0, 0]}>
+                {datosGraficoFacturado.map((_, i) => <Cell key={i} fill="#EB0A1E" />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         )}
       </div>
 

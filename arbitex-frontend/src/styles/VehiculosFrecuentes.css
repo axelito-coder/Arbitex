@@ -90,6 +90,27 @@
     color: white;
 }
 
+.grafico-botones {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.btn-grafico {
+  background: var(--superficie-alt);
+  color: var(--texto-suave);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-grafico.activo {
+  background: var(--acento);
+  color: #FFFFFF;
+}
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .resumen-datos {

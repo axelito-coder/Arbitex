@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
+import { error } from 'node:console'
 
 export interface RequestConUsuario extends Request {
   usuario?: {
@@ -36,6 +37,14 @@ export function soloEncargado(req: RequestConUsuario, res: Response, next: NextF
 export function soloAsesor(req: RequestConUsuario, res: Response, next: NextFunction) {
   if (req.usuario?.rol !== 'asesor') {
     return res.status(403).json({ mensaje: 'Acceso denegado' })
+  }
+  next()
+}
+
+export function soloRecepcion(req: RequestConUsuario, res: Response, next: NextFunction){
+  const rol = req.usuario?.rol
+  if(rol !== 'encargado' && rol !== 'recepcionista'){
+    return res.status(403).json({ mensaje: 'Acceso no autorizado'})
   }
   next()
 }

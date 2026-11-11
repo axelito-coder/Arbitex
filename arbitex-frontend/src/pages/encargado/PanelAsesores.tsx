@@ -17,42 +17,50 @@ type Asesor = {
 }
 
 function PanelAsesores() {
-  
-  const [ asesores, setAsesores] = useState<Asesor[]>([])
-  const [ loading, setLoading] = useState(true)
+
+  const [asesores, setAsesores] = useState<Asesor[]>([])
+  const [loading, setLoading] = useState(true)
   const [bonusAsesor, setBonusAsesor] = useState<number | null>(null)
   const [montoBonusInput, setMontoBonusInput] = useState('')
-  const [mensajeBonus, setMensajeBonus] = useState<{id: number, mensaje: string} | null>(null)
-  const [presupuesto, setPresupuesto] = useState({bonus: 0, usado: 0})
-  async function  cargarAsesores() {
-      try{
+  const [mensajeBonus, setMensajeBonus] = useState<{ id: number, mensaje: string } | null>(null)
+  const [presupuesto, setPresupuesto] = useState({ bonus: 0, usado: 0 })
+  const [esMobile, setEsMobile] = useState(window.innerWidth < 768)
 
-        //traemos el token para hacer las llamadas al back
-        const token = localStorage.getItem('token')
+  useEffect(() => {
+    const handler = () => setEsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
-        //traemos los datos de bonus disponible en la tabla config
-        const resConfig = await fetch('http://localhost:3000/encargado/config', {
-          headers: { Authorization: `Bearer ${token}`}
-        })
-        const config = await resConfig.json()
-        if(resConfig.ok){
-          setPresupuesto({bonus: Number(config.presupuesto_bonus), usado: Number(config.presupuesto_usado) })
-        }
+  async function cargarAsesores() {
+    try {
 
-        //traemos los datos de los encargados
-        const res = await fetch('http://localhost:3000/encargado/asesores', {
-          headers: { Authorization: `Bearer ${token}`}
-        })
-        const data = await res.json()
-        if(res.ok){
-          setAsesores(data)
-        }
-      }catch(err){
-        console.error(err)
-      }finally{
-        setLoading(false)
+      //traemos el token para hacer las llamadas al back
+      const token = localStorage.getItem('token')
+
+      //traemos los datos de bonus disponible en la tabla config
+      const resConfig = await fetch('http://localhost:3000/encargado/config', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const config = await resConfig.json()
+      if (resConfig.ok) {
+        setPresupuesto({ bonus: Number(config.presupuesto_bonus), usado: Number(config.presupuesto_usado) })
       }
+
+      //traemos los datos de los encargados
+      const res = await fetch('http://localhost:3000/encargado/asesores', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setAsesores(data)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
     }
+  }
   useEffect(() => {
     setLoading(false)
     cargarAsesores()
@@ -61,8 +69,8 @@ function PanelAsesores() {
   //Calcular métricas del equipo
   const mejorAcumulado = Math.max(...asesores.map(a => Number(a.acumulado_semanal)))
   const mejorTiempo = Math.min(...asesores.filter(a => Number(a.tiempo_promedio) > 0).map(a => Number(a.tiempo_promedio)))
-  
-  if(loading){
+
+  if (loading) {
     return <p className='seccion-titulo'>Cargando...</p>
   }
   const promedioEquipo = 20
@@ -72,28 +80,28 @@ function PanelAsesores() {
     distribucion: Number(a.acumulado_distribucion)
   }))
 
-  async function  handleDarBonus(idUsuario: number) { //post para mandar el bonus al asesor
-    if(!montoBonusInput || Number(montoBonusInput) <= 0) return
-    try{
+  async function handleDarBonus(idUsuario: number) { //post para mandar el bonus al asesor
+    if (!montoBonusInput || Number(montoBonusInput) <= 0) return
+    try {
       const token = localStorage.getItem('token')
       const res = await fetch(`http://localhost:3000/encargado/asesores/${idUsuario}/bonus`, {
         method: 'POST',
         headers: {
-          'Content-Type' : 'application/json',
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({monto: Number(montoBonusInput)})
+        body: JSON.stringify({ monto: Number(montoBonusInput) })
       })
       const data = await res.json()
-      setMensajeBonus({id: idUsuario, mensaje: data.mensaje})
+      setMensajeBonus({ id: idUsuario, mensaje: data.mensaje })
       setBonusAsesor(null)
       setMontoBonusInput('')
       cargarAsesores()
-    }catch{
-      setMensajeBonus({id: idUsuario, mensaje:'Error al conectar al servidor'})
+    } catch {
+      setMensajeBonus({ id: idUsuario, mensaje: 'Error al conectar al servidor' })
     }
   }
-  
+
   return (
     <div className="panel">
 
@@ -124,22 +132,22 @@ function PanelAsesores() {
 
           return (
             <div key={i} className="asesor-card">
-              <div style={{display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8}}>
-                {Number(asesor.acumulado_semanal) === mejorAcumulado && mejorAcumulado > 0 &&(
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+                {Number(asesor.acumulado_semanal) === mejorAcumulado && mejorAcumulado > 0 && (
                   <span className='alerta-badge-monto'>
                     🏆 Mejor facturación
                   </span>
                 )}
 
-                {Number(asesor.tiempo_promedio) === mejorTiempo && mejorTiempo > 0 &&(
+                {Number(asesor.tiempo_promedio) === mejorTiempo && mejorTiempo > 0 && (
                   <span className='alerta-badge-tiempo'>
                     ⚡ Mejor Tiempo
                   </span>
                 )}
                 {tieneFicticio && (
                   <span className='alerta-badge-ficticio'>
-                       ⚠ Ausencia esta semana
-                   </span>
+                    ⚠ Ausencia esta semana
+                  </span>
                 )}
               </div>
               <div className="asesor-header">
@@ -166,7 +174,7 @@ function PanelAsesores() {
 
               <div className="asesor-info">
                 <p className='asesor-label'>Comisión</p>
-                <p className='asesor-valor'>${(Number(asesor.comision)+ Number(asesor.bonus_semana)).toLocaleString('es-AR')}</p>
+                <p className='asesor-valor'>${(Number(asesor.comision) + Number(asesor.bonus_semana)).toLocaleString('es-AR')}</p>
               </div>
 
               <div className="asesor-info">
@@ -183,13 +191,13 @@ function PanelAsesores() {
 
                 {
                   bonusAsesor === asesor.id_usuario ? (
-                    <div style={{display: 'flex', gap: 8, alignItems: 'center'}}>
-                      <input type="number" className='item-input' placeholder='Monto' value={montoBonusInput} onChange={(e) => setMontoBonusInput(e.target.value)}  style={{width: 120}}/>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <input type="number" className='item-input' placeholder='Monto' value={montoBonusInput} onChange={(e) => setMontoBonusInput(e.target.value)} style={{ width: 120 }} />
                       <button className='gestion-btn-guardar' onClick={() => handleDarBonus(asesor.id_usuario)}>Dar</button>
                       <button className='gestion-btn-guardar' onClick={() => setBonusAsesor(null)}>✕</button>
                     </div>
                   ) : (
-                     <button className='gestion-btn-editar' onClick={() => setBonusAsesor(asesor.id_usuario)}>+ Bonus</button>
+                    <button className='gestion-btn-editar' onClick={() => setBonusAsesor(asesor.id_usuario)}>+ Bonus</button>
                   )
                 }
               </div>
@@ -200,34 +208,37 @@ function PanelAsesores() {
 
       {/* GRÁFICO COMPARATIVO */}
       <div className='panel-grafico'>
-         <div style={{display: 'flex', gap: 16, marginBottom: 12, fontSize: 12, color: '#595959'}}>
-              <div style={{display: 'flex', alignItems: 'center', gap: 6}}>
-                <div style={{width: 12, height: 12, borderRadius: 2, background: '#EB0A1E'}}></div>
-                <span>Facturado real</span>
-              </div>
-              <div style={{display: 'flex', alignItems: 'center', gap: 6}}>
-                <div style={{width: 12, height: 12, borderRadius: 2, background: '#E0E0E0'}}></div>
-                <span>Posicion de distribucion (incluye ajuste por ausencia)</span>
-              </div>
-            </div>
+        <div style={{ display: 'flex', gap: 16, marginBottom: 12, fontSize: 12, color: '#595959' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 12, height: 12, borderRadius: 2, background: '#EB0A1E' }}></div>
+            <span>Facturado real</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 12, height: 12, borderRadius: 2, background: '#E0E0E0' }}></div>
+            <span>Posicion de distribucion (incluye ajuste por ausencia)</span>
+          </div>
+        </div>
         <p className='seccion-titulo'>Acumulado semanal por asesor</p>
         <ResponsiveContainer width="100%" height={260}>
-          <BarChart data={datosGrafico}>
-            <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false}/>
-            <XAxis dataKey="nombre" tick={{ fontSize: 13, fill: '#595959'}} axisLine={false} tickLine={false}/>
-            <YAxis hide/>
-            <Tooltip formatter={(value, name) => {
-                          const num = Number(value) 
-                          return [`$${isNaN(num) ? '-' : num.toLocaleString('es-AR')}`, String(name)]}
-            }/>
+          <BarChart data={datosGrafico} margin={{ bottom: esMobile ? 0 : 40}}>
+            <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false} />
+            <XAxis dataKey="nombre" hide={esMobile} tick={{ fontSize: 13, fill: '#595959' }} axisLine={false} tickLine={false} />
+            <YAxis hide />
+            <Tooltip
+              labelFormatter={(label) => `Asesor: ${label}`}
+              formatter={(value, name) => {
+                const num = Number(value)
+                return [`$${isNaN(num) ? '-' : num.toLocaleString('es-AR')}`, String(name)]
+              }}
+            />
             <Bar dataKey="acumulado" name="Facturado real" radius={[4, 4, 0, 0]}>
               {datosGrafico.map((_, i) => (
-                <Cell key={i} fill="#EB0A1E"/>
+                <Cell key={i} fill="#EB0A1E" />
               ))}
             </Bar>
             <Bar dataKey="distribucion" name="acumulado distribucion" radius={[4, 4, 0, 0]}>
               {datosGrafico.map((_, i) => (
-                <Cell key={i} fill="#E0E0E0"/>
+                <Cell key={i} fill="#E0E0E0" />
               ))}
             </Bar>
           </BarChart>

@@ -23,9 +23,11 @@ function App() {
   //en el telefono el menu tapa el contenido, asi que arranca cerrado
   const [sidebar, setSidebar] = useState(() => !esPantallaChica())
   const [rol, setRol]         = useState(localStorage.getItem('rol') || '')
-  const [pagina, setPagina]   = useState(
-    localStorage.getItem('rol') === 'encargado' ? 'dashboard' : 'inicio'
-  )
+  const [pagina, setPagina]   = useState(()=>{
+    const rolGuardado = localStorage.getItem('rol') || ''
+    if(rolGuardado === 'encargado' || rolGuardado === 'recepcionista') return 'dashboard'
+    return 'inicio'
+  })
   const [tema, setTema]       = useState(localStorage.getItem('tema') || 'claro')
 
   useEffect(() => {
@@ -38,7 +40,7 @@ function App() {
       <Login
         onLogin={(rolUsuario: string) => {
           setRol(rolUsuario)
-          setPagina(rolUsuario === 'encargado' ? 'dashboard' : 'inicio')
+          setPagina(rolUsuario === 'encargado' || rolUsuario === 'recepcionista' ? 'dashboard' : 'inicio')
         }}
       />
     )

@@ -27,6 +27,14 @@ function MiPerfil() {
   const [turnos, setTurnos] = useState<Turno[]>([])
   const [grafico, setGrafico] = useState<'acumulado' | 'tiempos'>('acumulado') //Se usa para mostrar alguno de los gráficos
   const [loading, setLoading] = useState(true)
+  const [esMobile, setEsMobile] = useState(window.innerWidth < 768)
+
+  //para diferenciar si es mobile 
+  useEffect(() => {
+    const handler = () => setEsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
   useEffect(() => {
     async function cargarDatos() {
@@ -135,9 +143,9 @@ function MiPerfil() {
               </p>
             ) : (
               <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={perfil.acumulado_por_dia}>
+                <BarChart data={perfil.acumulado_por_dia} margin={{bottom: esMobile ? 0 : 20}}>
                   <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false}/>
-                  <XAxis dataKey="fecha" tick={{fontSize: 12, fill: '#595959'}} axisLine={false} tickLine={false}
+                  <XAxis dataKey="fecha" hide={esMobile} tick={{fontSize: 12, fill: '#595959'}} axisLine={false} tickLine={false}
                   tickFormatter={(v) => {
                     const fecha = new Date(v)
                     return fecha.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', timeZone: 'America/Argentina/Buenos_Aires'})
@@ -160,7 +168,7 @@ function MiPerfil() {
           </div>
         )}
 
-        {grafico === 'tiempos' && (
+        {grafico === 'tiempos' && !esMobile && (
           <ResponsiveContainer width="100%" height={Math.max(200, tiemposPorTurno.length * 50)}>
             <BarChart data={tiemposPorTurno} layout='vertical' margin={{ left: 20}}>
               <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' horizontal={false}/>
@@ -178,6 +186,13 @@ function MiPerfil() {
             </BarChart>
           </ResponsiveContainer>
         )}
+        {
+          grafico === 'tiempos' && esMobile &&(
+            <p style={{fontSize: 13, color: '#595959', textAlign: 'center', padding: 32}}>
+              El gráfico de tiempos de turnos esta habilitado solamente en escritorio y tablet
+            </p>
+          )
+        }
       </div>
 
     </div>
