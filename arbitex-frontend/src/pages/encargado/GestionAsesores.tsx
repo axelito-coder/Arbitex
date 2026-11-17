@@ -7,12 +7,13 @@ type Asesor = {
     sesion_activa: boolean
 }
 
-function GestionAsesores(){
-    const [ asesores, setAsesores ] = useState<Asesor[]>([])
-    const [ loading, setLoading ] = useState(true)
-    const [ modo, setModo ] = useState<'lista' | 'crear' | 'editar'>('lista')//es la herramienta principal para elegir que mostrar en el componente
-    const [ asesorEditando, setAsesorEditando ] = useState<Asesor | null>(null) //lo usamos para completar el formulario de editando
-    const [ form, setForm ] = useState({ nombre: '', email: '', password: ''}) //array del formulario
+function GestionAsesores() {
+    const [asesores, setAsesores] = useState<Asesor[]>([])
+    const [loading, setLoading] = useState(true)
+    const [modo, setModo] = useState<'lista' | 'crear' | 'editar'>('lista')//es la herramienta principal para elegir que mostrar en el componente
+    const [asesorEditando, setAsesorEditando] = useState<Asesor | null>(null) //lo usamos para completar el formulario de editando
+    const [form, setForm] = useState({ nombre: '', email: '', password: '' }) //array del formulario
+    const [modalBaja, setModalBaja] = useState<Asesor | null>(null)
     const [error, setError] = useState('') //para mostrar los errores
     const [exito, setExito] = useState('')
 
@@ -20,97 +21,118 @@ function GestionAsesores(){
         cargarAsesores()
     }, [])
 
-    async function  cargarAsesores() { //traemos todos los asesores
-        try{
+    async function cargarAsesores() { //traemos todos los asesores
+        try {
             const token = localStorage.getItem('token')
             const res = await fetch('http://localhost:3000/encargado/asesores', {
-                headers: { Authorization: `Bearer ${token}`}
+                headers: { Authorization: `Bearer ${token}` }
             })
             const data = await res.json()
-            if(res.ok){
+            if (res.ok) {
                 setAsesores(data)
             }
-        }catch(err){
+        } catch (err) {
             console.error(err)
-        }finally{
+        } finally {
             setLoading(false)
         }
     }
 
-    async function  handleGuardar() {
+    async function handleGuardar() {
         setError('')
         setExito('')
 
-        if(!form.nombre || !form.email){
+        if (!form.nombre || !form.email) {
             setError('Nombre y email son obligatorios')
             return
         }
 
-        if(modo === 'crear' && !form.password){
+        if (modo === 'crear' && !form.password) {
             setError('La contraseña es obligatoria')
             return
         }
 
-        try{
+        try {
             const token = localStorage.getItem('token')
             const url = modo === 'crear' ? 'http://localhost:3000/encargado/asesores'
-                                         : `http://localhost:3000/encargado/asesores/${asesorEditando?.id_usuario}` //segun el modo determinado se elige la ruta a la que el fetch va
-            
+                : `http://localhost:3000/encargado/asesores/${asesorEditando?.id_usuario}` //segun el modo determinado se elige la ruta a la que el fetch va
+
             console.log('asesorEditando:', asesorEditando)
             console.log('url:', url)
             const res = await fetch(url, {
                 method: modo === 'crear' ? 'POST' : 'PUT', //si es crear , POST, si es editar PUT
                 headers: {
-                    'Content-Type' : 'application/json',
+                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify(form)
             })
             const data = await res.json()
 
-            if(!res.ok){
+            if (!res.ok) {
                 setError(data.mensaje)
                 return
             }
             setExito(data.mensaje)
-            setForm({ nombre: '', email: '', password: ''})
+            setForm({ nombre: '', email: '', password: '' })
             setModo('lista')
             cargarAsesores()
-        }catch{
+        } catch {
             setError('Error al conectar con el servidor')
         }
     }
 
-    async function  handleDesactivar(id: number) {
-        try{
+    async function handleDesactivar(id: number) {
+        try {
             const token = localStorage.getItem('token')
             await fetch(`http://localhost:3000/encargado/asesores/${id}/desactivar`, {
                 method: 'PUT',
-                headers: { Authorization: `Bearer ${token}`}
+                headers: { Authorization: `Bearer ${token}` }
             })
             cargarAsesores()
-        }catch(err){
+        } catch (err) {
             console.error(err)
         }
     }
 
-    function abrirEditar(asesor: Asesor){
+    async function handleDarDeBaja(id: number) {
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch(`http://localhost:3000/encargado/asesores/${id}/baja`, {
+                method: 'PUT',
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            const data = await res.json()
+            if (!res.ok) {
+                setError(data.mensaje)
+            } else {
+                setExito(data.mensaje)
+                cargarAsesores()
+            }
+        } catch {
+            setError('Error al conectar con el servidor')
+        } finally {
+            setModalBaja(null)
+        }
+    }
+
+    function abrirEditar(asesor: Asesor) {
         setAsesorEditando(asesor)
-        setForm({nombre: asesor.nombre, email: asesor.email, password: ''})
+        setForm({ nombre: asesor.nombre, email: asesor.email, password: '' })
         setModo('editar')
         setError('')
         setExito('')
     }
 
-    if(loading){
+    if (loading) {
         return <p className='seccion-titulo'>Cargando...</p>
     }
 
-    if(modo === 'crear' || modo === 'editar'){ //aca segun si el modo es de editar o crear se cambia lo que muestra el componente,
+    if (modo === 'crear' || modo === 'editar') { //aca segun si el modo es de editar o crear se cambia lo que muestra el componente,
         //como crear y editar usan el mismo formulario, se puede usar lo mismo, solamente para editar se muestra ya los datos existentes
-        
+
         //Esto después lo voy a modificar para tratar que sea un componente diferente, no es bueno tener tanto código así
-        return(
+        return (
             <div className='gestion-form'>
                 <div className='gestion-card'>
                     <p className='gestion-titulo'>{modo === 'crear' ? 'Nuevo asesor' : 'Editar asesor'}</p>
@@ -120,20 +142,20 @@ function GestionAsesores(){
 
                     <div className='gestion-campo'>
                         <label className='gestion-label'>Nombre</label>
-                        <input type="text" className='gestion-input' value={form.nombre} onChange={(e) => setForm({...form, nombre: e.target.value})} placeholder='Nombre de asesor...' />
+                        <input type="text" className='gestion-input' value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder='Nombre de asesor...' />
                     </div>
                     <div className='gestion-campo'>
                         <label className='gestion-label'>Email</label>
-                        <input type="email" className='gestion-input' value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} placeholder='email de asesor...' />
+                        <input type="email" className='gestion-input' value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder='email de asesor...' />
                     </div>
 
                     <div className='gestion-campo'>
                         <label className='gestion-label'>Contraseña {modo === 'editar' && <span className='gestion-opcional'>dejar vacio para no cambiar</span>}</label>
-                        <input type="password" className='gestion-input' value={form.password} onChange={(e) => setForm({...form, password: e.target.value})} placeholder='••••••••' />
+                        <input type="password" className='gestion-input' value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder='••••••••' />
                     </div>
 
                     <div className='gestion-botones'>
-                        <button className='gestion-btn-cancelar' onClick={() => { setModo('lista'); setError('')}}>
+                        <button className='gestion-btn-cancelar' onClick={() => { setModo('lista'); setError('') }}>
                             Cancelar
                         </button>
 
@@ -146,11 +168,11 @@ function GestionAsesores(){
         )
     }
 
-    return(
+    return (
         <div className='gestion'>
             <div className='gestion-header'>
                 <p className='seccion-titulo'>Asesores ({asesores.length})</p>
-                <button className='gestion-btn-nuevo' onClick={() => {setModo('crear'); setForm({nombre: '', email: '', password: ''})}}>
+                <button className='gestion-btn-nuevo' onClick={() => { setModo('crear'); setForm({ nombre: '', email: '', password: '' }) }}>
                     + Nuevo asesor
                 </button>
             </div>
@@ -178,14 +200,19 @@ function GestionAsesores(){
                                     </span>
                                 </td>
                                 <td>
-                                    <div style={{ display: 'flex', gap: 8}}>
+                                    <div style={{ display: 'flex', gap: 8 }}>
                                         <button className='gestion-btn-editar' onClick={() => abrirEditar(a)}>
                                             Editar
                                         </button>
                                         {a.sesion_activa && (
-                                            <button className='gestion-btn-desactivar' onClick={() => handleDesactivar(a.id_usuario)}>
-                                                Desactivar
-                                            </button>
+                                            <>
+                                                <button className='gestion-btn-desactivar' onClick={() => handleDesactivar(a.id_usuario)}>
+                                                    Desactivar
+                                                </button>
+                                                <button className='gestion-btn-baja' onClick={() => setModalBaja(a)}>
+                                                    Dar de baja
+                                                </button>
+                                            </>
                                         )}
                                     </div>
                                 </td>
@@ -194,6 +221,23 @@ function GestionAsesores(){
                     </tbody>
                 </table>
             </div>
+            {modalBaja && ( //eliminar al asesor tiene una medida más de decision para evitar errores, por eso se usa overlay como el sidebar en telefono, para evitar líos
+                <div className='modal-overlay'>
+                    <div className='modal-card'>
+                        <p className='modal-titulo'>¿Dar de baja a {modalBaja.nombre}?</p>
+                        <p className='modal-texto'>Esta acción no se puede deshacer.</p>
+                        {error && <div className='gestion-error'>{error}</div>}
+                        <div className='gestion-botones'>
+                            <button className='gestion-btn-cancelar' onClick={() => { setModalBaja(null); setError('') }}>
+                                Cancelar
+                            </button>
+                            <button className='gestion-btn-baja' onClick={() => handleDarDeBaja(modalBaja.id_usuario)}>
+                                Confirmar baja
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 

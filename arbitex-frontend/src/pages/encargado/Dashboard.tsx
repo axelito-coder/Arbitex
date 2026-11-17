@@ -15,57 +15,59 @@ type Alerta = {
   tipo: string
 }
 
-function getClaseEstado(estado: string) {
-  if (estado === 'finalizado')  return 'badge badge-verde'
-  if (estado === 'en_proceso')  return 'badge badge-azul'
-  if (estado === 'asignado')    return 'badge badge-naranja'
+function getClaseEstado(estado: string) { //para  cambiar los colores segun estado del turno
+  if (estado === 'finalizado') return 'badge badge-verde'
+  if (estado === 'en_proceso') return 'badge badge-azul'
+  if (estado === 'asignado') return 'badge badge-naranja'
   return 'badge badge-gris'
 }
 
 function Dashboard() {
-  const [turnos, setTurnos]   = useState<Turno[]>([])
+  const [turnos, setTurnos] = useState<Turno[]>([])
   const [alertas, setAlertas] = useState<Alerta[]>([])
   const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    async function cargarDatos() { //función para traer los turnos del día
-      try {
-        const token = localStorage.getItem('token')
-        const res = await fetch('http://localhost:3000/encargado/turnos/hoy', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        const data = await res.json()
-        setTurnos(data)
+  async function cargarDatos() { //función para traer los turnos del día
+    try {
+      const token = localStorage.getItem('token')
+      const res = await fetch('http://localhost:3000/encargado/turnos/hoy', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await res.json()
+      setTurnos(data)
 
-         const pendientes = data.filter((t: Turno) => t.estado === 'pendiente')
-         const demorados = data.filter((t: Turno) => t.duracion !== null && t.duracion > 3 && t.estado === 'en_proceso')
+      const pendientes = data.filter((t: Turno) => t.estado === 'pendiente')
+      const demorados = data.filter((t: Turno) => t.duracion !== null && t.duracion > 3 && t.estado === 'en_proceso')
 
-        setAlertas([
-         ...pendientes.map((t:Turno) =>({
-         mensaje: `Turno de ${t.cliente} sin asignar`,
-         tipo: 'Sin asignar'
+      setAlertas([
+        ...pendientes.map((t: Turno) => ({
+          mensaje: `Turno de ${t.cliente} sin asignar`,
+          tipo: 'Sin asignar'
         })),
-         ...demorados.map((t: Turno) => ({
-         mensaje: `${t.asesor} lleva ${Math.round(t.duracion!)} min atendiendo a ${t.cliente}`,
-         tipo: 'demora'
+        ...demorados.map((t: Turno) => ({
+          mensaje: `${t.asesor} lleva ${Math.round(t.duracion!)} min atendiendo a ${t.cliente}`,
+          tipo: 'demora'
         }))
-  ])
+      ])
 
-      } catch (err) {
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() =>{
     cargarDatos()
+    const intervalo = setInterval(cargarDatos, 30 * 1000)
+    return () => clearInterval(intervalo)
   }, [])
 
   const resumen = [ //estados de los turnos del día
     { label: 'Total del día', valor: turnos.length },
-    { label: 'Asignados',     valor: turnos.filter(t => t.estado === 'asignado').length },
-    { label: 'En proceso',    valor: turnos.filter(t => t.estado === 'en_proceso').length },
-    { label: 'Finalizados',   valor: turnos.filter(t => t.estado === 'finalizado').length },
-    { label: 'Pendientes',    valor: turnos.filter(t => t.estado === 'pendiente').length },
+    { label: 'Asignados', valor: turnos.filter(t => t.estado === 'asignado').length },
+    { label: 'En proceso', valor: turnos.filter(t => t.estado === 'en_proceso').length },
+    { label: 'Finalizados', valor: turnos.filter(t => t.estado === 'finalizado').length },
+    { label: 'Pendientes', valor: turnos.filter(t => t.estado === 'pendiente').length },
   ]
 
   if (loading) return <p className="seccion-titulo">Cargando...</p>
@@ -110,7 +112,7 @@ function Dashboard() {
               ) : (
                 turnos.map((turno, i) => (
                   <tr key={i}>
-                    <td>{turno.hora_carga ? new Date(turno.hora_carga).toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'}) : '-'}</td>
+                    <td>{turno.hora_carga ? new Date(turno.hora_carga).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '-'}</td>
                     <td>{turno.cliente}</td>
                     <td>{turno.tipo_service}</td>
                     <td>{turno.asesor || '-'}</td>

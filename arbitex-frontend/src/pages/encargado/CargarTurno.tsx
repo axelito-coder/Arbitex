@@ -30,14 +30,14 @@ function CargarTurno(){
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>){
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>){ //controlamos los cambios que se hacen en los campos
     setForm({...form, [e.target.name]: e.target.value})
     setErrores({...errores, [e.target.name]: ''})
     setEnviado(false)
     setError('')
   }
 
-  async function handleSubmit() {
+  async function handleSubmit() { //controlar los campos antes de mandarlos al backend
     const nuevosErrores = { nombre_cliente: '', tipoService: '', contacto: '', dni: ''}
 
     if(!form.nombre_cliente){
@@ -53,7 +53,7 @@ function CargarTurno(){
       nuevosErrores.dni = 'El DNI es obligatorio'
     }     
 
-    if(nuevosErrores.nombre_cliente || nuevosErrores.tipoService || nuevosErrores.contacto){
+    if(nuevosErrores.nombre_cliente || nuevosErrores.tipoService || nuevosErrores.contacto || nuevosErrores.dni){
         setErrores(nuevosErrores)
         return
     }

@@ -81,6 +81,15 @@ function MiPerfil() {
     turno: t.cliente,
     minutos: t.duracion_minutos ? Math.round(t.duracion_minutos) : 0
   }))
+
+  //para que la fecha se vea bien
+  function formatearFechaTooltip(v: unknown) {
+  const fecha = new Date(v as string)
+  return fecha.toLocaleDateString('es-AR', {
+    weekday: 'long', day: 'numeric', month: 'long',
+    timeZone: 'America/Argentina/Buenos_Aires'
+  })
+}
   
   return (
     <div className="mi-perfil">
@@ -143,21 +152,32 @@ function MiPerfil() {
               </p>
             ) : (
               <ResponsiveContainer width="100%" height={200}>
+                 {/* BarChart: el gráfico en sí. margin agrega espacio abajo para las etiquetas del eje X */}
                 <BarChart data={perfil.acumulado_por_dia} margin={{bottom: esMobile ? 0 : 20}}>
+                  
+                  {/* CartesianGrid: las líneas de fondo. vertical={false} muestra solo las horizontales */}
                   <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false}/>
-                  <XAxis dataKey="fecha" hide={esMobile} tick={{fontSize: 12, fill: '#595959'}} axisLine={false} tickLine={false}
+
+                   {/* XAxis: eje con los días. hide lo oculta en mobile. tickFormatter transforma la fecha ISO a texto legible */}
+                  <XAxis dataKey="fecha" hide={esMobile} tick={{fontSize: 12, fill: 'var(--texto-suave)'}} axisLine={false} tickLine={false}
                   tickFormatter={(v) => {
                     const fecha = new Date(v)
                     return fecha.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', timeZone: 'America/Argentina/Buenos_Aires'})
                   }}/>
+
+                  {/* YAxis: eje de los valores en $. Se oculta porque los valores se muestran con LabelList */}
                   <YAxis hide/>
-                  <Tooltip labelFormatter={(v) => {
-                    const fecha = new Date(v)
-                    return fecha.toLocaleDateString('es-AR', {weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Argentina/Buenos_Aires'})
-                  }}
-                   formatter={(value) => typeof value === 'number' ? [`$${value.toLocaleString('es-AR')}`, 'Acumulado'] : [value, '']}/>
+
+                  {/* Tooltip: el cuadro al pasar el mouse. labelFormatter formatea la fecha, formatter agrega el $ al valor */}
+                  <Tooltip contentStyle={{ background: 'var(--superficie)', border: '1px solid var(--borde)', borderRadius: 8, fontSize: 12 }} itemStyle={{color: 'var(--texto-suave)'}} labelFormatter={formatearFechaTooltip} formatter={(value) => [`$${Number(value).toLocaleString('es-AR')}`, 'Acumulado']}/>
+                  
+                   {/* Bar: las barras del gráfico */}
                   <Bar dataKey="total" radius={[4, 4, 0, 0]}>
+                    
+                    {/* LabelList: muestra el valor en $ encima de cada barra */}
                     <LabelList dataKey="total" position="top" formatter={(v: unknown) => typeof v === 'number' ? `$${v.toLocaleString('es-AR')}` : ''} style={{ fontSize: 11, fill: '#595959'}}/>
+                    
+                    {/* Cell: aplica el color rojo a cada barra */}
                     {perfil.acumulado_por_dia.map((_, i) => (
                       <Cell key={i} fill='#EB0A1E'/>
                     ))}
@@ -170,13 +190,19 @@ function MiPerfil() {
 
         {grafico === 'tiempos' && !esMobile && (
           <ResponsiveContainer width="100%" height={Math.max(200, tiemposPorTurno.length * 50)}>
+
             <BarChart data={tiemposPorTurno} layout='vertical' margin={{ left: 20}}>
+              
               <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' horizontal={false}/>
               <XAxis type='number' hide/>
-              <YAxis dataKey="turno" type='category' tick={{ fontSize: 13, fill: '#595959'}} axisLine={false} tickLine={false} width={110}/>
-              <Tooltip formatter={(value) => typeof value === 'number' ? `${value} min` : ''}/>
-              <Bar dataKey="minutos" radius={[0, 4, 4, 0]}>
-                <LabelList dataKey="minutos" position="right" formatter={(v) => v != null ? `${v} min` : ''} style={{fontSize: 12, fill: '#595959'}}/>
+              <YAxis dataKey="turno" type='category' tick={{ fontSize: 13, fill: 'var(--texto-suave)'}} axisLine={false} tickLine={false} width={110}/>
+             
+             <Tooltip 
+               contentStyle={{ background: 'var(--superficie)', border: '1px solid var(--borde)', borderRadius: 8, fontSize: 12, color: 'var(--texto)' }}
+               itemStyle={{ color: 'var(--texto)' }}
+               formatter={(value) => [`${value} min`, 'Tiempo']}/>
+             <Bar dataKey="minutos" radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="minutos" position="center" formatter={(v) => v != null ? `${v} min` : ''} style={{fontSize: 15, fill: 'black'}}/>
                   {
                     tiemposPorTurno.map((t, i) => (
                       <Cell key={i} fill={t.minutos > promedioEquipo ? '#F59E0B' : '#10B981'}/>

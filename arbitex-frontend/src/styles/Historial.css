@@ -115,6 +115,12 @@
 .badge-gris       { background: var(--badge-gris-fondo); color: var(--badge-gris-texto); }
 .badge-gris-oscuro{ background: var(--gris-fuerte); color: var(--texto); }
 
+.historial-grafico{
+  background: var(--superficie);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .historial-filtros {

@@ -42,44 +42,44 @@ type Props = {
     onVolver: () => void
     urlBase: string //la url porque asesor y encargado tienen en sus respectivos rutas y controladores una funcion para traer todo el turno
 }
-function formatearFecha(fechaISO: string){
-  const fecha = new Date(fechaISO)
-  return fecha.toLocaleDateString('es-AR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
+function formatearFecha(fechaISO: string) {
+    const fecha = new Date(fechaISO)
+    return fecha.toLocaleDateString('es-AR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    })
 }
 
-function DetalleTurno({ idTurno, onVolver, urlBase }: Props){
+function DetalleTurno({ idTurno, onVolver, urlBase }: Props) {
     const [detalle, setDetalle] = useState<Detalle | null>(null)
-    const [agregando, setAgregando ] = useState(false)
+    const [agregando, setAgregando] = useState(false)
     const [exito, setExito] = useState('')
-    async function  cargarDetalle() {
-        try{
+    async function cargarDetalle() {
+        try {
             const token = localStorage.getItem('token')
             const res = await fetch(`${urlBase}/turnos/${idTurno}/detalle`, {  //traemos el turno
-                    headers: { Authorization: `Bearer ${token}`}
+                headers: { Authorization: `Bearer ${token}` }
             })
             const data = await res.json()
-            if(res.ok) setDetalle(data)
-        }catch (err){
-           console.error(err)   
-        } 
+            if (res.ok) setDetalle(data)
+        } catch (err) {
+            console.error(err)
+        }
     }
     useEffect(() => {
         cargarDetalle()
     }, [idTurno])
 
-    if(!detalle){
+    if (!detalle) {
         return <p className='seccion-titulo'>Error al caregar el turno...</p>
     }
 
-    function imprimirPDF(){
+    function imprimirPDF() {
         window.print()
     }
 
-    return(
+    return (
         <div className='detalle'>
             <div className='detalle-header'>
                 <button className='detalle-volver' onClick={onVolver}>Volver</button>
@@ -121,7 +121,34 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props){
                 {detalle.items && detalle.items.length > 0 && (
                     <div className='detalle-seccion'>
                         <p className='detalle-label'>Items</p>
-                        <table className='tabla'>
+
+                        {/* Mobile */}
+                        <div className='items-cards'>
+                            {detalle.items.map((item, i) => (
+                                <div key={i} className='item-card'>
+                                    <p className='item-card-descripcion'>{item.descripcion}</p>
+                                    <div className='item-card-fila'>
+                                        <span className='item-card-label'>Tipo</span>
+                                        <span>{item.tipo === 'mano_obra' ? 'Mano de obra' : 'Repuesto'}</span>
+                                    </div>
+                                    <div className='item-card-fila'>
+                                        <span className='item-card-label'>Cantidad</span>
+                                        <span>{item.cantidad}</span>
+                                    </div>
+                                    <div className='item-card-fila'>
+                                        <span className='item-card-label'>Precio unitario</span>
+                                        <span>${Number(item.precio_unitario).toLocaleString('es-AR')}</span>
+                                    </div>
+                                    <div className='item-card-fila'>
+                                        <span className='item-card-label'>Subtotal</span>
+                                        <span>${(item.cantidad * item.precio_unitario).toLocaleString('es-AR')}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Desktop */}
+                        <table className='tabla items-tabla'>
                             <thead>
                                 <tr>
                                     <th>Descripcion</th>
@@ -132,17 +159,15 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props){
                                 </tr>
                             </thead>
                             <tbody>
-                                {
-                                    detalle.items.map((item, i) =>(
-                                        <tr key={i}>
-                                            <td>{item.descripcion}</td>
-                                            <td>{item.tipo === 'mano_obra' ? 'Mano de obra' : 'Repuesto'}</td>
-                                            <td>{item.cantidad}</td>
-                                            <td>${Number(item.precio_unitario).toLocaleString('es-AR')}</td>
-                                            <td>${(item.cantidad * item.precio_unitario).toLocaleString('es-AR')}</td>
-                                        </tr>
-                                    ))
-                                }
+                                {detalle.items.map((item, i) => (
+                                    <tr key={i}>
+                                        <td>{item.descripcion}</td>
+                                        <td>{item.tipo === 'mano_obra' ? 'Mano de obra' : 'Repuesto'}</td>
+                                        <td>{item.cantidad}</td>
+                                        <td>${Number(item.precio_unitario).toLocaleString('es-AR')}</td>
+                                        <td>${(item.cantidad * item.precio_unitario).toLocaleString('es-AR')}</td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
@@ -161,19 +186,19 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props){
                     </div>
                 )}
 
-                {detalle.estado === 'finalizado' && urlBase.includes('asesor') &&(
+                {detalle.estado === 'finalizado' && urlBase.includes('asesor') && (
                     <div className='detalle-seccion agregar'>
                         {exito && <div className='cargar-exito'>{exito}</div>}
                         {!agregando ? (
                             <button className='detalle-volver' onClick={() => setAgregando(true)}>+ Agregar trabajo adicional</button>
                         ) : (
                             <AgregarItems idTurno={idTurno} urlBase={urlBase}
-                            onAgregado={() => {
-                                setAgregando(false)
-                                setExito('Trabajo adicional agregado')
-                                cargarDetalle()
-                            }}
-                            onCancelar={() => setAgregando(false)}
+                                onAgregado={() => {
+                                    setAgregando(false)
+                                    setExito('Trabajo adicional agregado')
+                                    cargarDetalle()
+                                }}
+                                onCancelar={() => setAgregando(false)}
                             />
                         )}
                     </div>
@@ -181,7 +206,7 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props){
             </div>
         </div>
 
-        
+
     )
 }
 

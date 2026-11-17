@@ -32,7 +32,7 @@ function diasDesde(fechaISO: string) {
   return Math.floor(ms / (1000 * 60 * 60 * 24))
 }
 
-function cumpleVisitas(visitas: number, filtro: string) {
+function cumpleVisitas(visitas: number, filtro: string) { //filtro de visitas
   if (!filtro) return true
   if (filtro === 'sin') return visitas === 0
   if (filtro === '1-2') return visitas >= 1 && visitas <= 2
@@ -41,7 +41,7 @@ function cumpleVisitas(visitas: number, filtro: string) {
   return true
 }
 
-function cumpleService(fechaISO: string, filtro: string) {
+function cumpleService(fechaISO: string, filtro: string) { 
   if (!filtro) return true
   const dias = diasDesde(fechaISO)
   if (filtro === 'nunca') return dias === null
@@ -356,11 +356,12 @@ function VehiculosFrecuentes() {
           {graficoActivo === 'visitas' ? 'Modelos más frecuentes' : 'Modelos que más generan'}
         </p>
 
+       {/* Graficos a elegir */}
         {graficoActivo === 'visitas' ? (
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={datosGrafico} margin={{ bottom: esMobile ? 0 : 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false} />
-              <XAxis dataKey="nombre" hide={esMobile} tick={{ fontSize: 11, fill: '#595959' }} axisLine={false} tickLine={false} interval={0} />
+              <XAxis dataKey="nombre" hide={esMobile} tick={{ fontSize: 11, fill: 'var(--texto-suave)' }} axisLine={false} tickLine={false} interval={0} />
               <YAxis hide />
               <Tooltip labelFormatter={(label) => `${label}`} formatter={(value) => [`${value} visitas`, 'Visitas']} />
               <Bar dataKey="visitas" name="Visitas" radius={[4, 4, 0, 0]}>
@@ -369,10 +370,12 @@ function VehiculosFrecuentes() {
             </BarChart>
           </ResponsiveContainer>
         ) : (
+          
+          /* Grafico de facturado */
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={datosGraficoFacturado} margin={{ bottom: esMobile ? 0 : 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false} />
-              <XAxis dataKey="nombre" hide={esMobile} tick={{ fontSize: 11, fill: '#595959' }} axisLine={false} tickLine={false} interval={0} />
+              <XAxis dataKey="nombre" hide={esMobile} tick={{ fontSize: 11, fill: 'var(--texto-suave)' }} axisLine={false} tickLine={false} interval={0} />
               <YAxis hide />
               <Tooltip labelFormatter={(label) => `${label}`} formatter={(value) => [`$${Number(value).toLocaleString('es-AR')}`, 'Facturado']} />
               <Bar dataKey="facturado" name="Facturado" radius={[4, 4, 0, 0]}>

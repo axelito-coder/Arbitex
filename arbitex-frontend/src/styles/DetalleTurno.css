@@ -130,6 +130,33 @@
     width: 100%;
   }
 }
+/* Mobile: tarjetas */
+.items-tabla { display: none !important; }
+.items-cards { display: flex; flex-direction: column; gap: 10px; }
+
+.item-card {
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 13px;
+}
+.item-card-descripcion {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.item-card-fila {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.item-card-label { color: #888; }
+
+/* Desktop */
+@media (min-width: 768px) {
+  .items-tabla { display: table !important; }
+  .items-cards { display: none !important; }
+}
 @media (max-width: 480px) {
   .detalle-card { padding: 18px; }
   .detalle-nombre { font-size: 22px; letter-spacing: 2px; }

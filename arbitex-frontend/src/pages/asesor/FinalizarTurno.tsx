@@ -45,6 +45,11 @@ function FinalizarTurno({ idTurno, cliente, tipoService, onFinalizado, onCancela
     function handleItemChange(index: number, campo: keyof Item, valor: string | number){
         const nuevos = [...items] //creamos un espacio con todos los items primero, como un backup
         nuevos[index] = {...nuevos[index], [campo]: valor} //en el item con el index pasado desde front se modifica el campo especifico
+
+        //si cambian el tipo a mano de obra se fuerza la cantidad a 1
+        if(campo === 'tipo' && valor === 'mano_obra'){
+            nuevos[index].cantidad = 1
+        }
         setItems(nuevos)
     }
 

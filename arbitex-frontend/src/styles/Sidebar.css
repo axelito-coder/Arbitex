@@ -82,3 +82,28 @@
   background: var(--acento);
   color: #FFFFFF;
 }
+
+.sidebar-symbol {
+    position: relative;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.sidebar-symbol .arrow-track-1 {
+    position: absolute;
+    inset: 0;
+    animation: spinForward 2.5s linear infinite;
+}
+
+.sidebar-symbol .arrow-track-2 {
+    position: absolute;
+    inset: 0;
+    animation: spinForward 2.5s linear infinite;
+    animation-delay: -1.25s;
+}
+
+@keyframes spinForward {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}

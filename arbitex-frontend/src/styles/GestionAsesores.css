@@ -143,6 +143,49 @@
   color: #FFFFFF;
   cursor: pointer;
 }
+
+.gestion-btn-baja {
+  padding: 5px 12px;
+  background: var(--acento-texto);
+  border: 1px solid var(--acento-texto);
+  border-radius: 6px;
+  font-size: 12px;
+  margin-left: 30px;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-card {
+  background: var(--superficie);
+  border-radius: 10px;
+  padding: 28px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: var(--sombra);
+}
+
+.modal-titulo {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--texto);
+  margin-bottom: 8px;
+}
+
+.modal-texto {
+  font-size: 13px;
+  color: var(--texto-suave);
+  margin-bottom: 20px;
+}
 @media (max-width: 480px) {
   .gestion-card { padding: 18px; }
   .gestion-botones { flex-direction: column; }

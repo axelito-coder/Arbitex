@@ -181,6 +181,7 @@ export async function  getPanelAsesores(req: RequestConUsuario, res: Response) {
             FROM empleados e
             JOIN usuarios u ON u.id = e.id_usuario
             LEFT JOIN turnos t ON t.id_asesor = e.id
+            WHERE u.activo = true
             GROUP BY u.id, u.nombre, u.email, e.acumulado_semanal, e.acumulado_distribucion, e.sesion_activa,
                      e.tiempo_promedio, e.orden_compensacion, e.dias_trabajados_semana, e.bonus_semana
             ORDER BY e.acumulado_semanal ASC    
@@ -311,6 +312,38 @@ export async function  desactivarAsesor(req: RequestConUsuario, res: Response) {
   }
 }
 
+
+//para dar de baja el asesor (no trabaja mmás)
+export async function darDeBajaAsesor(req: RequestConUsuario, res: Response) {
+  const { id } = req.params
+  try{
+    //verificar si tiene turnos hoy
+    const turnosActivos = await pool.query(`
+      SELECT COUNT(*) FROM turnos
+      WHERE id_asesor = (SELECT id FROM empleados WHERE id_usuario = $1)
+      AND estado = 'en_proceso'
+      AND fecha = CURRENT_DATE
+    `, [id])
+
+    if(parseInt(turnosActivos.rows[0].count) > 0){
+      return res.status(400).json({mensaje: 'El asesor está con turnos en proceso. Finalizalos antes de dar de baja'})
+    }
+
+    await pool.query(`
+      UPDATE usuarios SET activo = false WHERE id = $1 AND rol = 'asesor'
+    `, [id])
+    //También cerrar sesion para sacarlo de distribucion
+    await pool.query(`
+      UPDATE empleados SET sesion_activa = false
+      WHERE id_usuario = $1
+    `, [id])
+    return res.json({mensaje: 'Asesor dado de baja'})
+  }catch(err){
+    console.error(err)
+    return res.status(500).json({mensaje: 'Error interno del servidor'})
+  }
+}
+
 export async function darBonus(req: RequestConUsuario, res: Response) {
   const { id } = req.params
   const { monto } = req.body
@@ -346,5 +379,24 @@ export async function darBonus(req: RequestConUsuario, res: Response) {
   }catch(err){
     console.error(err)
     return res.status(500).json({ mensaje: 'Error intero del servidor'})
+  }
+}
+
+//Obtener turnos por hora
+export async function  getTurnosPorHora(req: RequestConUsuario, res: Response) {
+  try{
+    const result = await pool.query(`
+      SELECT
+       EXTRACT(HOUR FROM hora_inicio_atencion)::int AS hora,
+       COUNT(*)::int AS cantidad
+      FROM turnos
+       WHERE hora_inicio_atencion IS NOT NULL
+      GROUP BY hora
+      ORDER BY hora
+    `)
+    res.json(result.rows)
+  }catch(err){
+    console.error(err)
+    res.status(500).json({mensaje: 'Error al obtener turnos por hora'})
   }
 }

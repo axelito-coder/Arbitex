@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { TooltipGrafico } from '../../components/TooltipGrafico'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import '../../styles/PanelAsesores.css'
 
@@ -220,17 +221,29 @@ function PanelAsesores() {
         </div>
         <p className='seccion-titulo'>Acumulado semanal por asesor</p>
         <ResponsiveContainer width="100%" height={260}>
+
+          {/* BarChart: el gráfico en sí. margin agrega espacio abajo para las etiquetas del eje X */}
           <BarChart data={datosGrafico} margin={{ bottom: esMobile ? 0 : 40}}>
+
+            {/* CartesianGrid: las líneas de fondo. vertical={false} muestra solo las horizontales */}
             <CartesianGrid strokeDasharray="3 3" stroke='#E0E0E0' vertical={false} />
-            <XAxis dataKey="nombre" hide={esMobile} tick={{ fontSize: 13, fill: '#595959' }} axisLine={false} tickLine={false} />
+
+             {/* XAxis: eje con los asesores. hide lo oculta en mobile.*/}
+            <XAxis dataKey="nombre" hide={esMobile} tick={{ fontSize: 13, fill: 'var(--texto-suave)' }} axisLine={false} tickLine={false} />
+
+            {/* YAxis: eje de los valores en $. Se oculta porque los valores se muestran con LabelList */}
             <YAxis hide />
-            <Tooltip
+
+            {/* Tooltip: el cuadro al pasar el mouse. labelFormatter muestra al asesor, formatter agrega el $ al valor */}
+            <Tooltip content={<TooltipGrafico/>}
               labelFormatter={(label) => `Asesor: ${label}`}
               formatter={(value, name) => {
                 const num = Number(value)
                 return [`$${isNaN(num) ? '-' : num.toLocaleString('es-AR')}`, String(name)]
               }}
             />
+
+            {/* Bar: las barras del gráfico */}
             <Bar dataKey="acumulado" name="Facturado real" radius={[4, 4, 0, 0]}>
               {datosGrafico.map((_, i) => (
                 <Cell key={i} fill="#EB0A1E" />
