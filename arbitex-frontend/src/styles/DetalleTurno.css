@@ -114,22 +114,6 @@
   color: var(--texto-suave);
 }
 
-@media print {
-  .detalle-header { display: none; }
-  .detalle-card { box-shadow: none; }
-  .agregar {display: none;}
-
-  body * {
-    visibility: hidden;
-  }
-  #detalle-imprimible, #detalle-imprimible * {visibility: visible;}
-  #detalle-imprimible {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
-}
 /* Mobile: tarjetas */
 .items-tabla { display: none !important; }
 .items-cards { display: flex; flex-direction: column; gap: 10px; }
@@ -152,12 +136,71 @@
 }
 .item-card-label { color: #888; }
 
+/* Botones editar/eliminar items */
+.item-accion {
+  background: transparent;
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  padding: 2px 7px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--texto-suave);
+  margin-left: 4px;
+}
+
+.item-accion:hover {
+  background: var(--borde);
+}
+
+.item-accion-guardar {
+  color: #2e7d32;
+  border-color: #2e7d32;
+}
+
+.item-accion-cancelar {
+  color: #c62828;
+  border-color: #c62828;
+}
+
+.item-input-edicion {
+  width: 70px;
+  padding: 2px 4px;
+  border: 1px solid var(--acento);
+  border-radius: 4px;
+  font-size: 13px;
+  background: var(--superficie);
+  color: var(--texto);
+}
+
 /* Desktop */
 @media (min-width: 768px) {
   .items-tabla { display: table !important; }
   .items-cards { display: none !important; }
+  
 }
 @media (max-width: 480px) {
   .detalle-card { padding: 18px; }
   .detalle-nombre { font-size: 22px; letter-spacing: 2px; }
+}
+
+@media print {
+  .detalle-header { display: none; }
+  .detalle-card { box-shadow: none; }
+  .agregar {display: none;}
+  .detalle-comision{display: none;}
+
+  body * {
+    visibility: hidden;
+  }
+  #detalle-imprimible, #detalle-imprimible * {visibility: visible;}
+  #detalle-imprimible {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+   .item-accion { display: none; }        /* ← agregar */
+  th:last-child { display: none; }       /* ← oculta columna Acciones */
+  td:last-child { display: none; }       /* ← oculta celdas de acciones */
 }

@@ -1,5 +1,5 @@
 import { Router as ExpressRouter } from "express";
-import { getPerfil, getTurnosHoy, getTurnosSemana,  finalizarTurno,  getDetalleTurno, agregarItems} from "../controllers/asesorController";
+import { getPerfil, getTurnosHoy, getTurnosSemana,  finalizarTurno,  getDetalleTurno, agregarItems, editarItem, eliminarItem} from "../controllers/asesorController";
 import { soloAsesor, verificarToken } from "../middlewares/authMiddleware";
 const asesorRouter = ExpressRouter()
 
@@ -12,6 +12,8 @@ asesorRouter.get('/turnos/hoy', getTurnosHoy)
 asesorRouter.get('/turnos/semana', getTurnosSemana)
 asesorRouter.put('/turnos/:id/finalizar', finalizarTurno)
 asesorRouter.post('/turnos/:id/items', agregarItems)
+asesorRouter.put('/turnos/:id/items/:itemId', editarItem)
+asesorRouter.delete('/turnos/:id/items/:itemId', eliminarItem)
 
 export default asesorRouter
 

@@ -28,7 +28,7 @@ export async function  getDetalleTurno(req:RequestConUsuario, res: Response) {
             return res.status(404).json({ mensaje: 'Turno no encontrado'})
         }
         const itemsResult = await pool.query(`
-            SELECT descripcion, cantidad, precio_unitario, tipo
+            SELECT id::integer, descripcion, cantidad, precio_unitario, tipo
             FROM items_turno
             WHERE id_turno = $1
         `, [id])
@@ -353,5 +353,131 @@ export async function  agregarItems(req: RequestConUsuario, res: Response) { //p
     }catch(err){
         console.error(err)
         return res.status(500).json({ mensaje: 'Error interno del sevidor'})
+    }
+}
+
+export async function editarItem(req: RequestConUsuario, res: Response) {
+    const { id, itemId } = req.params
+    const { cantidad, precio_unitario } = req.body
+
+    if (cantidad == null || precio_unitario == null) {
+        return res.status(400).json({ mensaje: 'Debe enviar cantidad y precio_unitario' })
+    }
+
+    try {
+        // Verificar que el turno pertenece al asesor y está finalizado
+        const turnoResult = await pool.query(`
+            SELECT t.id FROM turnos t
+            JOIN empleados e ON e.id = t.id_asesor
+            WHERE t.id = $1
+            AND e.id_usuario = $2
+            AND t.estado = 'finalizado'
+        `, [id, req.usuario?.id])
+
+        if (turnoResult.rows.length === 0) {
+            return res.status(404).json({ mensaje: 'Turno no encontrado o no está finalizado' })
+        }
+
+        // Obtener el valor anterior del item para ajustar acumulado
+        const itemAnterior = await pool.query(`
+            SELECT cantidad, precio_unitario FROM items_turno
+            WHERE id = $1 AND id_turno = $2
+        `, [itemId, id])
+
+        if (itemAnterior.rows.length === 0) {
+            return res.status(404).json({ mensaje: 'Item no encontrado' })
+        }
+
+        const valorAnterior = itemAnterior.rows[0].cantidad * itemAnterior.rows[0].precio_unitario
+        const valorNuevo = cantidad * precio_unitario
+        const diferencia = valorNuevo - valorAnterior
+
+        // Actualizar el item
+        await pool.query(`
+            UPDATE items_turno
+            SET cantidad = $1, precio_unitario = $2
+            WHERE id = $3 AND id_turno = $4
+        `, [cantidad, precio_unitario, itemId, id])
+
+        // Recalcular total de la factura
+        const totalResult = await pool.query(`
+            SELECT SUM(cantidad * precio_unitario) AS total FROM items_turno WHERE id_turno = $1
+        `, [id])
+        const total = parseFloat(totalResult.rows[0].total)
+
+        await pool.query(`
+            UPDATE facturas SET total = $1 WHERE id_turno = $2
+        `, [total, id])
+
+        // Ajustar acumulado del asesor por la diferencia
+        await pool.query(`
+            UPDATE empleados
+            SET acumulado_semanal = acumulado_semanal + $1,
+                acumulado_distribucion = acumulado_distribucion + $1
+            WHERE id_usuario = $2
+        `, [diferencia, req.usuario?.id])
+
+        return res.json({ mensaje: 'Item actualizado correctamente', total })
+    } catch (err) {
+        console.error(err)
+        return res.status(500).json({ mensaje: 'Error interno del servidor' })
+    }
+}
+
+export async function eliminarItem(req: RequestConUsuario, res: Response) {
+    const { id, itemId } = req.params
+
+    try {
+        const turnoResult = await pool.query(`
+            SELECT t.id FROM turnos t
+            JOIN empleados e ON e.id = t.id_asesor
+            WHERE t.id = $1
+            AND e.id_usuario = $2
+            AND t.estado = 'finalizado'
+        `, [id, req.usuario?.id])
+
+        if (turnoResult.rows.length === 0) {
+            return res.status(404).json({ mensaje: 'Turno no encontrado o no está finalizado' })
+        }
+
+        // Obtener el valor del item antes de eliminarlo
+        const itemResult = await pool.query(`
+            SELECT cantidad, precio_unitario FROM items_turno
+            WHERE id = $1 AND id_turno = $2
+        `, [itemId, id])
+
+        if (itemResult.rows.length === 0) {
+            return res.status(404).json({ mensaje: 'Item no encontrado' })
+        }
+
+        const valorItem = itemResult.rows[0].cantidad * itemResult.rows[0].precio_unitario
+
+        // Eliminar el item
+        await pool.query(`
+            DELETE FROM items_turno WHERE id = $1 AND id_turno = $2
+        `, [itemId, id])
+
+        // Recalcular total
+        const totalResult = await pool.query(`
+            SELECT COALESCE(SUM(cantidad * precio_unitario), 0) AS total FROM items_turno WHERE id_turno = $1
+        `, [id])
+        const total = parseFloat(totalResult.rows[0].total)
+
+        await pool.query(`
+            UPDATE facturas SET total = $1 WHERE id_turno = $2
+        `, [total, id])
+
+        // Restar del acumulado del asesor
+        await pool.query(`
+            UPDATE empleados
+            SET acumulado_semanal = acumulado_semanal - $1,
+                acumulado_distribucion = acumulado_distribucion - $1
+            WHERE id_usuario = $2
+        `, [valorItem, req.usuario?.id])
+
+        return res.json({ mensaje: 'Item eliminado correctamente', total })
+    } catch (err) {
+        console.error(err)
+        return res.status(500).json({ mensaje: 'Error interno del servidor' })
     }
 }

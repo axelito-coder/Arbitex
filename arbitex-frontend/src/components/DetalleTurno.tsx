@@ -6,6 +6,7 @@ import '../styles/DetalleTurno.css'
 //En typescript cuando hacemos type ... definimos como debe ser un objeto
 //Cuando typescript compila el codigo a javascript, los types no existen mas, solo sirven para detectar errores y hacer las coas mas limpias
 type Item = {
+    id: number,
     descripcion: string,
     cantidad: number,
     precio_unitario: number,
@@ -55,6 +56,10 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props) {
     const [detalle, setDetalle] = useState<Detalle | null>(null)
     const [agregando, setAgregando] = useState(false)
     const [exito, setExito] = useState('')
+    const [editandoId, setEditandoId] = useState<number | null>(null)
+    const [editCantidad, setEditCantidad] = useState('')
+    const [editPrecio, setEditPrecio] = useState('')
+    const [confirmandoEliminarId, setConfirmandoEliminarId] = useState<number | null>(null)
     async function cargarDetalle() {
         try {
             const token = localStorage.getItem('token')
@@ -73,6 +78,33 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props) {
 
     if (!detalle) {
         return <p className='seccion-titulo'>Error al caregar el turno...</p>
+    }
+
+    async function guardarEdicion(itemId: number) {
+        const token = localStorage.getItem('token')
+        const res = await fetch(`${urlBase}/turnos/${idTurno}/items/${itemId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ cantidad: parseFloat(editCantidad), precio_unitario: parseFloat(editPrecio) })
+        })
+        if (res.ok) {
+            setEditandoId(null)
+            setExito('Item actualizado')
+            cargarDetalle()
+        }
+    }
+
+    async function eliminarItemFn(itemId: number) {
+        const token = localStorage.getItem('token')
+        const res = await fetch(`${urlBase}/turnos/${idTurno}/items/${itemId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        if (res.ok) {
+            setConfirmandoEliminarId(null)
+            setExito('Item eliminado')
+            cargarDetalle()
+        }
     }
 
     function imprimirPDF() {
@@ -156,6 +188,7 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props) {
                                     <th>Cant</th>
                                     <th>Precio unitario</th>
                                     <th>Subtotal</th>
+                                    {detalle.estado === 'finalizado' && urlBase.includes('asesor') && <th>Acciones</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -163,9 +196,42 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props) {
                                     <tr key={i}>
                                         <td>{item.descripcion}</td>
                                         <td>{item.tipo === 'mano_obra' ? 'Mano de obra' : 'Repuesto'}</td>
-                                        <td>{item.cantidad}</td>
-                                        <td>${Number(item.precio_unitario).toLocaleString('es-AR')}</td>
+                                        <td>
+                                            {editandoId === item.id && detalle.estado === 'finalizado' && urlBase.includes('asesor')
+                                                ? item.tipo === 'mano_obra'
+                                                    ? Math.round(item.cantidad)
+                                                    : <input className="item-input-edicion" type="number" value={editCantidad} onChange={e => setEditCantidad(e.target.value)} />
+                                                : Math.round(item.cantidad)
+                                            }
+                                        </td>
+                                        <td>
+                                            {editandoId === item.id && detalle.estado === 'finalizado' && urlBase.includes('asesor')
+                                                ? <input className='item-input-edicion' type="number" value={editPrecio} onChange={e => setEditPrecio(e.target.value)} style={{ width: '90px' }} />
+                                                : `$${Number(item.precio_unitario).toLocaleString('es-AR')}`
+                                            }
+                                        </td>
                                         <td>${(item.cantidad * item.precio_unitario).toLocaleString('es-AR')}</td>
+                                        {detalle.estado === 'finalizado' && urlBase.includes('asesor') && (
+                                            <td>
+                                                {editandoId === item.id
+                                                    ? <>
+                                                        <button className="item-accion item-accion-guardar" onClick={() => guardarEdicion(item.id)}>✓</button>
+                                                        <button className="item-accion item-accion-cancelar" onClick={() => setEditandoId(null)}>✗</button>
+                                                    </>
+                                                    : <>
+                                                        <button className='item-accion' onClick={() => { setEditandoId(item.id); setEditCantidad(String(Math.round(item.cantidad))); setEditPrecio(String(Math.round(item.precio_unitario))) }}>✏️</button>
+                                                        {confirmandoEliminarId === item.id
+                                                            ? <>
+                                                                <span style={{ fontSize: '12px', color: 'var(--texto-suave)' }}>¿Eliminar?</span>
+                                                                <button className="item-accion item-accion-cancelar" onClick={() => eliminarItemFn(item.id)}>✓</button>
+                                                                <button className="item-accion" onClick={() => setConfirmandoEliminarId(null)}>✗</button>
+                                                            </>
+                                                            : <button className="item-accion item-accion-cancelar" onClick={() => setConfirmandoEliminarId(item.id)}>🗑️</button>
+                                                        }
+                                                    </>
+                                                }
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>
@@ -180,7 +246,7 @@ function DetalleTurno({ idTurno, onVolver, urlBase }: Props) {
                             <span>${Number(detalle.total).toLocaleString('es-AR')}</span>
                         </div>
                         <div className='detalle-total-fila detalle-comision'>
-                            <span>Comision ($1)</span>
+                            <span>Comision (1%)</span>
                             <span>${Number(detalle.total * 0.01).toLocaleString('es-AR')}</span>
                         </div>
                     </div>
